@@ -28,21 +28,24 @@ const ZkscanContainer = () => {
             .then(data => setInfo(Object.entries(data.result.finalized.balances)))
     }
 
+    const parseInfo = (info) => {
+        const nodes = info.map(item => {
+            return <p>Token: {item[0]} Balance: {item[1]}</p>
+        })
+        return nodes
+    }
 
-    const nodes = info.map(item => {
-        return <p>Token: {item[0]} Balance: {item[1]}</p>
-    })
 
-    return (
-        <>
-            <h3>zkscan container</h3>
-            <AddressForm onAddressFormSubmit={onAddressFormSubmit} />
-            <h2>{address ? address : null}</h2>
-            <p>{info ? <section>
-                {nodes}
-            </section> : null}</p>
-        </>
-    )
+return (
+    <>
+        <h3>zkscan container</h3>
+        <AddressForm onAddressFormSubmit={onAddressFormSubmit} />
+        <h2>{address ? address : null}</h2>
+        <p>{info ? <section>
+            {parseInfo(info)}
+        </section> : null}</p>
+    </>
+)
 
 }
 
