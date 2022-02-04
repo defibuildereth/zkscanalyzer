@@ -7,6 +7,7 @@ const ZkscanContainer = () => {
     const [info, setInfo] = useState("");
     const [decimals, setDecimals] = useState([]);
     const [allInfo, setAllInfo] = useState([])
+    const [total, setTotal] = useState("")
 
     useEffect(() => {
         searchAddress(address)
@@ -35,9 +36,15 @@ const ZkscanContainer = () => {
     }
 
     const parseInfo = (info) => {
+        let total = 0;
         const nodes = info.map(item => {
-            return <p>Token: {item[0]} Balance: {item.balance} Deciamsl: {item.decimals} Price: {item.price}</p>
+            console.log(total)
+            total = total+(Number(item.price)*item.balance*10**(0-item.decimals))
+            // total += (Number(item.price)*item.balance*10**(0-item.decimals))
+            return <p>Token: {item.token} Balance: {(item.balance*10**(0-item.decimals)).toFixed(2)} Price: {Number(item.price).toFixed(2)} Value:{(Number(item.price)*item.balance*10**(0-item.decimals)).toFixed(2)}</p>
         })
+        console.log('final total: ', total)
+        // setTotal(total)
         return nodes
     }
 
@@ -62,7 +69,7 @@ const ZkscanContainer = () => {
     const getTokenDecimal = async function (token) {
         let decimal;
         let price;
-        // console.log('query: ', `https://api.zksync.io/api/v0.2/tokens/${token}/priceIn/usd`)
+        console.log('query: ', `https://api.zksync.io/api/v0.2/tokens/${token}/priceIn/usd`)
         await fetch(`https://api.zksync.io/api/v0.2/tokens/${token}/priceIn/usd`)
             .then((res) => res.json())
             .then(data => {
@@ -93,10 +100,9 @@ const ZkscanContainer = () => {
             <h3>zkscan container</h3>
             <AddressForm onAddressFormSubmit={onAddressFormSubmit} />
             <h2>{address ? address : null}</h2>
-            <p>{allInfo ? <section>
+            {allInfo ? <section>
                 {parseInfo(allInfo)}
-            </section> : null}</p>
-            {/* <p>{decimals ? decimals : null}</p> */}
+            </section> : null}
         </>
     )
 
