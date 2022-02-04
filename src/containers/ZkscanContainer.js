@@ -58,22 +58,24 @@ const ZkscanContainer = () => {
 
     const getTokenDecimal = async function (token) {
         let decimal;
+        let price;
         // console.log('query: ', `https://api.zksync.io/api/v0.2/tokens/${token}/priceIn/usd`)
         await fetch(`https://api.zksync.io/api/v0.2/tokens/${token}/priceIn/usd`)
             .then((res) => res.json())
             .then(data => {
                 // console.log('get decimal result: ', token, data.result.decimals)
-                decimal = data.result.decimals
+                decimal = data.result.decimals;
+                price = data.result.price;
             })
 
-        return ({ token: token, decimal: decimal })
+        return ({ token: token, decimal: decimal, price: price })
     }
 
     const parsePrices = function (info, decimals) {
         let tokenBalanceDecimalsArray = []
         for (let i = 0; i < info.length; i++) {
             if (info[i][0] == decimals[i].token) {
-                tokenBalanceDecimalsArray.push({ token: info[i][0], balance: info[i][1], decimals: decimals[i].decimal })
+                tokenBalanceDecimalsArray.push({ token: info[i][0], balance: info[i][1], decimals: decimals[i].decimal, price: decimals[i].price })
             }
         }
         console.log(tokenBalanceDecimalsArray)
