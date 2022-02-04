@@ -6,6 +6,7 @@ const ZkscanContainer = () => {
     const [address, setAddress] = useState("");
     const [info, setInfo] = useState("");
     const [decimals, setDecimals] = useState([]);
+    const [allInfo, setAllInfo] = useState([])
 
     useEffect(() => {
         searchAddress(address)
@@ -20,6 +21,8 @@ const ZkscanContainer = () => {
         parsePrices(info, decimals)
     }, [decimals])
 
+    
+
     const onAddressFormSubmit = (submittedAddress) => {
         console.log('Address Submitted: ', submittedAddress)
         setAddress(submittedAddress.submittedAddress)
@@ -33,7 +36,7 @@ const ZkscanContainer = () => {
 
     const parseInfo = (info) => {
         const nodes = info.map(item => {
-            return <p>Token: {item[0]} Balance: {item[1]}</p>
+            return <p>Token: {item[0]} Balance: {item.balance} Deciamsl: {item.decimals} Price: {item.price}</p>
         })
         return nodes
     }
@@ -50,7 +53,7 @@ const ZkscanContainer = () => {
 
         await Promise.all(decimalsPromiseArray)
             .then((values) => {
-                // console.log('promise array result: ', values)
+                console.log('promise array result: ', values)
                 setDecimals(values)
             }
             )
@@ -72,6 +75,8 @@ const ZkscanContainer = () => {
     }
 
     const parsePrices = function (info, decimals) {
+        console.log(info)
+        console.log(decimals)
         let tokenBalanceDecimalsArray = []
         for (let i = 0; i < info.length; i++) {
             if (info[i][0] == decimals[i].token) {
@@ -79,7 +84,7 @@ const ZkscanContainer = () => {
             }
         }
         console.log(tokenBalanceDecimalsArray)
-        return tokenBalanceDecimalsArray
+        setAllInfo(tokenBalanceDecimalsArray)
     }
 
 
@@ -88,8 +93,8 @@ const ZkscanContainer = () => {
             <h3>zkscan container</h3>
             <AddressForm onAddressFormSubmit={onAddressFormSubmit} />
             <h2>{address ? address : null}</h2>
-            <p>{info ? <section>
-                {parseInfo(info)}
+            <p>{allInfo ? <section>
+                {parseInfo(allInfo)}
             </section> : null}</p>
             {/* <p>{decimals ? decimals : null}</p> */}
         </>
