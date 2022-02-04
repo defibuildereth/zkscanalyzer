@@ -12,14 +12,12 @@ const ZkscanContainer = () => {
     }, [address])
 
     useEffect(() => {
-        console.log(info)
-        parsePrices(info)
-        // parsePrices(info)
-        // console.log(Object.entries(info))
+        // console.log(info)
+        getDecimals(info)
     }, [info])
 
     useEffect(() => {
-        console.log(decimals)
+        parsePrices(info, decimals)
     }, [decimals])
 
     const onAddressFormSubmit = (submittedAddress) => {
@@ -40,7 +38,7 @@ const ZkscanContainer = () => {
         return nodes
     }
 
-    const parsePrices = async function (info) {
+    const getDecimals = async function (info) {
         let decimalsPromiseArray = []
 
         for (let i = 0; i < info.length; i++) {
@@ -48,12 +46,12 @@ const ZkscanContainer = () => {
             decimalsPromiseArray.push(getTokenDecimal(token))
         }
 
-        console.log('decimals promise array: ', decimalsPromiseArray)
+        // console.log('decimals promise array: ', decimalsPromiseArray)
 
         await Promise.all(decimalsPromiseArray)
             .then((values) => {
-                console.log('promise array result: ', values)
-                // .then(setDecimals(decimalsArray))
+                // console.log('promise array result: ', values)
+                setDecimals(values)
             }
             )
     }
@@ -64,11 +62,21 @@ const ZkscanContainer = () => {
         await fetch(`https://api.zksync.io/api/v0.2/tokens/${token}/priceIn/usd`)
             .then((res) => res.json())
             .then(data => {
-                console.log('get decimal result: ', token, data.result.decimals)
+                // console.log('get decimal result: ', token, data.result.decimals)
                 decimal = data.result.decimals
             })
         
         return ({token: token, decimal: decimal})
+    }
+
+    const parsePrices = function (info, decimals) {
+        for (let i = 0; i < info.length; i++) {
+            for (let i = 0; i < decimals.length; i++) {
+                if (info[i][0] == decimals[i].token) {
+                    console.log(info[i], decimals[i])
+                }
+            }
+        }
     }
 
 
@@ -80,7 +88,7 @@ const ZkscanContainer = () => {
             <p>{info ? <section>
                 {parseInfo(info)}
             </section> : null}</p>
-            <p>{decimals ? decimals : null}</p>
+            {/* <p>{decimals ? decimals : null}</p> */}
         </>
     )
 
