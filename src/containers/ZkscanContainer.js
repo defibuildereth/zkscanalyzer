@@ -73,7 +73,7 @@ const ZkscanContainer = () => {
         for (let i = 0; i < info.length; i++) {
             for (let i = 0; i < decimals.length; i++) {
                 if (info[i][0] == decimals[i].token) {
-                    console.log(info[i], decimals[i])
+                    console.log('token: ', info[i][0], 'balance: ', info[i][1], 'decimals: ', decimals[i].decimal)
                 }
             }
         }
