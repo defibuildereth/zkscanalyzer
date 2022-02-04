@@ -65,18 +65,19 @@ const ZkscanContainer = () => {
                 // console.log('get decimal result: ', token, data.result.decimals)
                 decimal = data.result.decimals
             })
-        
-        return ({token: token, decimal: decimal})
+
+        return ({ token: token, decimal: decimal })
     }
 
     const parsePrices = function (info, decimals) {
+        let tokenBalanceDecimalsArray = []
         for (let i = 0; i < info.length; i++) {
-            for (let i = 0; i < decimals.length; i++) {
-                if (info[i][0] == decimals[i].token) {
-                    console.log('token: ', info[i][0], 'balance: ', info[i][1], 'decimals: ', decimals[i].decimal)
-                }
+            if (info[i][0] == decimals[i].token) {
+                tokenBalanceDecimalsArray.push({ token: info[i][0], balance: info[i][1], decimals: decimals[i].decimal })
             }
         }
+        console.log(tokenBalanceDecimalsArray)
+        return tokenBalanceDecimalsArray
     }
 
 
