@@ -18,7 +18,7 @@ const ZkscanContainer = () => {
     useEffect(() => {
         getDecimals(info)
         console.log(nonce)
-        getTransactions(nonce, address)
+        getTransactions(address, 'latest')
     }, [info])
 
     useEffect(() => {
@@ -51,15 +51,16 @@ const ZkscanContainer = () => {
         return nodes
     }
 
-    const getTransactions = async function (nonce, address) {
-        let workingNonce = nonce
+    const getTransactions = async function (address, tx) {
         let transactionsPromiseArray = []
 
         // console.log('hitting getTransactions: ', nonce, address)
-        await fetch(`https://api.zksync.io/api/v0.2/accounts/${address}/transactions?from=latest&limit=100&direction=older`)
+        await fetch(`https://api.zksync.io/api/v0.2/accounts/${address}/transactions?from=${tx}&limit=100&direction=older`)
             .then((res) => res.json())
             .then(data => {
-                console.log(data)
+                if (data.result.list.length > 99) {
+                    console.log(data.result.list[99].txHash)
+                }
             })
     }
 
