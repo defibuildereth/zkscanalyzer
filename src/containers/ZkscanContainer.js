@@ -17,13 +17,14 @@ const ZkscanContainer = () => {
 
     useEffect(() => {
         getDecimals(info)
+        console.log(nonce)
+        getTransactions(nonce, address)
     }, [info])
 
     useEffect(() => {
         parsePrices(info, decimals)
     }, [decimals])
 
-    
 
     const onAddressFormSubmit = (submittedAddress) => {
         setAddress(submittedAddress.submittedAddress)
@@ -33,22 +34,35 @@ const ZkscanContainer = () => {
         fetch(`https://api.zksync.io/api/v0.2/accounts/${address}`)
             .then((res) => res.json())
             .then(data => {
-                console.log(data)
-                setInfo(Object.entries(data.result.finalized.balances))
+                // console.log(data)
                 setNonce(data.result.finalized.nonce)
+                setInfo(Object.entries(data.result.finalized.balances))
             })
     }
 
     const parseInfo = (info) => {
         const nodes = info.map(item => {
-            total = total+(Number(item.price)*item.balance*10**(0-item.decimals))
+            total = total + (Number(item.price) * item.balance * 10 ** (0 - item.decimals))
             // total += (Number(item.price)*item.balance*10**(0-item.decimals))
-            return <p>Token: {item.token} Balance: {(item.balance*10**(0-item.decimals)).toFixed(2)} Price: {Number(item.price).toFixed(2)} Value:{(Number(item.price)*item.balance*10**(0-item.decimals)).toFixed(2)}</p>
+            return <p>Token: {item.token} Balance: {(item.balance * 10 ** (0 - item.decimals)).toFixed(2)} Price: {Number(item.price).toFixed(2)} Value:{(Number(item.price) * item.balance * 10 ** (0 - item.decimals)).toFixed(2)}</p>
         })
         // console.log('final total: ', total);
         // setTotal(total)
         return nodes
     }
+
+    const getTransactions = async function (nonce, address) {
+        let workingNonce = nonce
+        let transactionsPromiseArray = []
+
+        // console.log('hitting getTransactions: ', nonce, address)
+        await fetch(`https://api.zksync.io/api/v0.2/accounts/${address}/transactions?from=latest&limit=100&direction=older`)
+            .then((res) => res.json())
+            .then(data => {
+                console.log(data)
+            })
+    }
+
 
     const getDecimals = async function (info) {
         let decimalsPromiseArray = []
@@ -100,7 +114,7 @@ const ZkscanContainer = () => {
             {allInfo ? <section>
                 {parseInfo(allInfo)}
             </section> : null}
-            {total ? <h3>${total.toFixed(2)}</h3>: null}
+            {total ? <h3>${total.toFixed(2)}</h3> : null}
 
         </>
     )
