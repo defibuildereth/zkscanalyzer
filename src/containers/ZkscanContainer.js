@@ -4,7 +4,8 @@ import AddressForm from '../components/AddressForm';
 const ZkscanContainer = () => {
 
     let total = 0;
-    let transactionsTotal = 0;
+    let roughVol = 0;
+
 
     const [address, setAddress] = useState("");
     const [info, setInfo] = useState("");
@@ -18,7 +19,7 @@ const ZkscanContainer = () => {
 
     useEffect(() => {
         getDecimals(info)
-        console.log(nonce)
+        // console.log(nonce)
         getTransactions(address, 'latest', 0)
     }, [info])
 
@@ -60,13 +61,36 @@ const ZkscanContainer = () => {
             .then((res) => res.json())
             .then(data => {
                 for (let i = index; i <data.result.list.length; i++) {
-                    console.log(data.result.list[i])
+                    // console.log(data.result.list[i])
+                    // txArray.push(data.result.list[i])
+                    getTransactionVolume(data.result.list[i])
                 }
+                
                 if (data.result.list.length > 99) {
                     getTransactions(address, data.result.list[99].txHash, 1)
                 }
             })
     }
+
+
+    const getTransactionVolume = async function (tx) {
+        if (tx.op.type == 'Swap') {
+            console.log(tx)
+        // console.log('amount: ',tx.op.orders[1].amount)
+        let token = tx.op.orders[1].tokenSell
+        await fetch(`https://api.zksync.io/api/v0.2/tokens/${token}/priceIn/usd`)
+        .then((res) => res.json())
+        .then(data => {
+            // console.log(data)
+            let decimal = data.result.decimals;
+            let amount = tx.op.orders[1].amount;
+            let price = data.result.price;
+            roughVol = roughVol+(amount*10**(0-decimal)*price)
+            console.log(roughVol)
+        })
+    }
+    }
+
 
 
     const getDecimals = async function (info) {
@@ -115,6 +139,7 @@ const ZkscanContainer = () => {
             <AddressForm onAddressFormSubmit={onAddressFormSubmit} />
             <h2>{address ? address : null}</h2>
             <h2>{address ? `Transactions: ${nonce}` : null}</h2>
+            <h2>{address ? roughVol : null}</h2>
 
             {allInfo ? <section>
                 {parseInfo(allInfo)}
