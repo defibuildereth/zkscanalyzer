@@ -4,6 +4,7 @@ import AddressForm from '../components/AddressForm';
 const ZkscanContainer = () => {
 
     let total = 0;
+    let transactionsTotal = 0;
 
     const [address, setAddress] = useState("");
     const [info, setInfo] = useState("");
@@ -18,7 +19,7 @@ const ZkscanContainer = () => {
     useEffect(() => {
         getDecimals(info)
         console.log(nonce)
-        getTransactions(address, 'latest')
+        getTransactions(address, 'latest', 0)
     }, [info])
 
     useEffect(() => {
@@ -51,15 +52,18 @@ const ZkscanContainer = () => {
         return nodes
     }
 
-    const getTransactions = async function (address, tx) {
+    const getTransactions = async function (address, tx, index) {
 
         console.log('calling getTransactions with tx: ', tx)
         // console.log('hitting getTransactions: ', nonce, address)
         await fetch(`https://api.zksync.io/api/v0.2/accounts/${address}/transactions?from=${tx}&limit=100&direction=older`)
             .then((res) => res.json())
             .then(data => {
+                for (let i = index; i <data.result.list.length; i++) {
+                    console.log(data.result.list[i])
+                }
                 if (data.result.list.length > 99) {
-                    getTransactions(address, data.result.list[99].txHash)
+                    getTransactions(address, data.result.list[99].txHash, 1)
                 }
             })
     }
