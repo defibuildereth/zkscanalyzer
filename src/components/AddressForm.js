@@ -26,12 +26,14 @@ const AddressForm = ({ onAddressFormSubmit }) => {
             <form onSubmit={handleAddressSubmit}>
                 <input
                     type="text"
+                    id="add"
                     placeholder="Address"
                     value={submittedAddress}
                     onChange={handleAddressChange}
                 />
                 <input
                     type="submit"
+                    id="searchsubmit"
                     value="Search"
                 />
             </form>

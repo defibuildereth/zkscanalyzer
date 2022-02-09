@@ -8,7 +8,8 @@ const ZkscanContainer = () => {
     const [address, setAddress] = useState("");
     const [info, setInfo] = useState("");
     const [decimals, setDecimals] = useState([]);
-    const [allInfo, setAllInfo] = useState([])
+    const [allInfo, setAllInfo] = useState([]);
+    const [nonce, setNonce] = useState("");
 
     useEffect(() => {
         searchAddress(address)
@@ -31,7 +32,11 @@ const ZkscanContainer = () => {
     const searchAddress = (address) => {
         fetch(`https://api.zksync.io/api/v0.2/accounts/${address}`)
             .then((res) => res.json())
-            .then(data => setInfo(Object.entries(data.result.finalized.balances)))
+            .then(data => {
+                console.log(data)
+                setInfo(Object.entries(data.result.finalized.balances))
+                setNonce(data.result.finalized.nonce)
+            })
     }
 
     const parseInfo = (info) => {
@@ -40,7 +45,7 @@ const ZkscanContainer = () => {
             // total += (Number(item.price)*item.balance*10**(0-item.decimals))
             return <p>Token: {item.token} Balance: {(item.balance*10**(0-item.decimals)).toFixed(2)} Price: {Number(item.price).toFixed(2)} Value:{(Number(item.price)*item.balance*10**(0-item.decimals)).toFixed(2)}</p>
         })
-        console.log('final total: ', total);
+        // console.log('final total: ', total);
         // setTotal(total)
         return nodes
     }
@@ -80,7 +85,7 @@ const ZkscanContainer = () => {
                 tokenBalanceDecimalsArray.push({ token: info[i][0], balance: info[i][1], decimals: decimals[i].decimal, price: decimals[i].price })
             }
         }
-        console.log(tokenBalanceDecimalsArray)
+        // console.log(tokenBalanceDecimalsArray)
         setAllInfo(tokenBalanceDecimalsArray)
     }
 
@@ -90,10 +95,13 @@ const ZkscanContainer = () => {
             <h1>ZkScanalyzer by DefiBuilder.eth</h1>
             <AddressForm onAddressFormSubmit={onAddressFormSubmit} />
             <h2>{address ? address : null}</h2>
+            <h2>{address ? `Transactions: ${nonce}` : null}</h2>
+
             {allInfo ? <section>
                 {parseInfo(allInfo)}
             </section> : null}
-            {total ? <h2>${total.toFixed(2)}</h2>: null}
+            {total ? <h3>${total.toFixed(2)}</h3>: null}
+
         </>
     )
 
