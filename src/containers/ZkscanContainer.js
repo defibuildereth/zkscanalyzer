@@ -5,6 +5,7 @@ const ZkscanContainer = () => {
 
     let total = 0;
     let roughVol = 0;
+    let txArray = [];
 
 
     const [address, setAddress] = useState("");
@@ -12,6 +13,7 @@ const ZkscanContainer = () => {
     const [decimals, setDecimals] = useState([]);
     const [allInfo, setAllInfo] = useState([]);
     const [nonce, setNonce] = useState("");
+    const [totalVol, setTotalVol] = useState(0)
 
     useEffect(() => {
         searchAddress(address)
@@ -60,35 +62,63 @@ const ZkscanContainer = () => {
         await fetch(`https://api.zksync.io/api/v0.2/accounts/${address}/transactions?from=${tx}&limit=100&direction=older`)
             .then((res) => res.json())
             .then(data => {
-                for (let i = index; i <data.result.list.length; i++) {
+                for (let i = index; i < data.result.list.length; i++) {
                     // console.log(data.result.list[i])
                     // txArray.push(data.result.list[i])
-                    getTransactionVolume(data.result.list[i])
+                    txArray.push(data.result.list[i])
                 }
-                
+
                 if (data.result.list.length > 99) {
                     getTransactions(address, data.result.list[99].txHash, 1)
+                } else {
+                    getTotalVol(txArray)
                 }
             })
     }
 
 
     const getTransactionVolume = async function (tx) {
+        let txVol = 0;
         if (tx.op.type == 'Swap') {
-            console.log(tx)
-        // console.log('amount: ',tx.op.orders[1].amount)
-        let token = tx.op.orders[1].tokenSell
-        await fetch(`https://api.zksync.io/api/v0.2/tokens/${token}/priceIn/usd`)
-        .then((res) => res.json())
-        .then(data => {
-            // console.log(data)
-            let decimal = data.result.decimals;
-            let amount = tx.op.orders[1].amount;
-            let price = data.result.price;
-            roughVol = roughVol+(amount*10**(0-decimal)*price)
-            console.log(roughVol)
-        })
+            // console.log(tx)
+            // console.log('amount: ',tx.op.orders[1].amount)
+            let token = tx.op.orders[1].tokenSell
+            await fetch(`https://api.zksync.io/api/v0.2/tokens/${token}/priceIn/usd`)
+                .then((res) => res.json())
+                .then(data => {
+                    // console.log(data)
+                    let decimal = data.result.decimals;
+                    let amount = tx.op.orders[1].amount;
+                    let price = data.result.price;
+                    txVol = amount * 10 ** (0 - decimal) * price
+                    // console.log(roughVol)
+                })
+            return txVol
+        }
     }
+
+    const getTotalVol = async function (array) {
+        let volPromiseArray = []
+
+        for (let i = 0; i < array.length; i++) {
+            volPromiseArray.push(getTransactionVolume(array[i]))
+        }
+
+        await Promise.all(volPromiseArray)
+            .then((values) => {
+                let grandTotal = 0;
+                console.log('values.length: ', values.length)
+                for (let i = 0; i < values.length; i++) {
+                    if (values[i]) {
+                        grandTotal = grandTotal + values[i]
+
+                    }
+                    // console.log(values[i])
+                }
+
+                setTotalVol(grandTotal)
+            })
+
     }
 
 
@@ -139,7 +169,7 @@ const ZkscanContainer = () => {
             <AddressForm onAddressFormSubmit={onAddressFormSubmit} />
             <h2>{address ? address : null}</h2>
             <h2>{address ? `Transactions: ${nonce}` : null}</h2>
-            <h2>{address ? roughVol : null}</h2>
+            <h2>{totalVol ? `Ballpark Volume: $${totalVol.toFixed(2)}` : null}</h2>
 
             {allInfo ? <section>
                 {parseInfo(allInfo)}
