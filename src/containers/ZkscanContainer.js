@@ -113,7 +113,7 @@ const ZkscanContainer = () => {
                         grandTotal = grandTotal + values[i]
 
                     }
-                    // console.log(values[i])
+                    console.log(grandTotal)
                 }
 
                 setTotalVol(grandTotal)
@@ -174,7 +174,7 @@ const ZkscanContainer = () => {
             {allInfo ? <section>
                 {parseInfo(allInfo)}
             </section> : null}
-            {total ? <h3>${total.toFixed(2)}</h3> : null}
+            {total ? <h3 id="myID">${total.toFixed(2)}</h3> : null}
 
         </>
     )
