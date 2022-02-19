@@ -14,6 +14,7 @@ const ZkscanContainer = () => {
     const [allInfo, setAllInfo] = useState([]);
     const [nonce, setNonce] = useState("");
     const [totalVol, setTotalVol] = useState(0)
+    const [uniques, setUniques] = useState([])
 
     useEffect(() => {
         searchAddress(address)
@@ -71,54 +72,105 @@ const ZkscanContainer = () => {
                 if (data.result.list.length > 99) {
                     getTransactions(address, data.result.list[99].txHash, 1)
                 } else {
-                    getTotalVol(txArray)
+                    getTotalVol(txArray, [])
+                        .then(() => {
+                            console.log(arrays[0])
+                            setUniques(arrays[0])
+                        })
                 }
             })
     }
-
 
     const getTransactionVolume = async function (tx) {
         let txVol = 0;
-        if (tx.op.type == 'Swap') {
-            // console.log(tx)
-            // console.log('amount: ',tx.op.orders[1].amount)
-            let token = tx.op.orders[1].tokenSell
-            await fetch(`https://api.zksync.io/api/v0.2/tokens/${token}/priceIn/usd`)
-                .then((res) => res.json())
-                .then(data => {
-                    // console.log(data)
-                    let decimal = data.result.decimals;
-                    let amount = tx.op.orders[1].amount;
-                    let price = data.result.price;
-                    txVol = amount * 10 ** (0 - decimal) * price
-                    // console.log(roughVol)
-                })
-            return txVol
-        }
+        let token = tx.token
+        await fetch(`https://api.zksync.io/api/v0.2/tokens/${token}/priceIn/usd`)
+            .then((res) => res.json())
+            .then(data => {
+                // console.log(data)
+                let decimal = data.result.decimals;
+                let amount = tx.amount;
+                let price = data.result.price;
+                txVol = amount * 10 ** (0 - decimal) * price
+                // console.log(roughVol)
+            })
+        return txVol
     }
 
-    const getTotalVol = async function (array) {
-        let volPromiseArray = []
+    // const uniqueArrayMaker2 = function (objArray, uniqueArray) {
 
-        for (let i = 0; i < array.length; i++) {
-            volPromiseArray.push(getTransactionVolume(array[i]))
-        }
+    //     if (!(uniqueArray.length)) {
+    //         uniqueArray.push(objArray[0])
+    //         objArray.shift();
+    //         if (objArray.length > 0) {
+    //             uniqueArrayMaker2(objArray, uniqueArray)
+    //         }
+    //     } else {
+    //         for (let i = 0; i < uniqueArray.length; i++) {
+    //             if (objArray.length) {
+    //                 if (uniqueArray[i].token == objArray[0].token) {
+    //                     uniqueArray[i].value += objArray[0].value
+    //                     uniqueArray[i].tokenBalance += objArray[0].tokenBalance
+    //                     objArray.shift();
+    //                     if (objArray.length > 0) {
+    //                         uniqueArrayMaker2(objArray, uniqueArray)
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //         if (objArray.length) {
+    //             // console.log(`unique item: ${objArray[0].token}, pushing`)
+    //             uniqueArray.push(objArray[0]);
 
-        await Promise.all(volPromiseArray)
-            .then((values) => {
-                let grandTotal = 0;
-                console.log('values.length: ', values.length)
-                for (let i = 0; i < values.length; i++) {
-                    if (values[i]) {
-                        grandTotal = grandTotal + values[i]
+    //             objArray.shift();
+    //             if (objArray.length > 0) {
+    //                 // console.log('calling, objArray length = ', objArray.length)
+    //                 uniqueArrayMaker2(objArray, uniqueArray)
+    //             }
+    //         }
+    //     }
+    //     arrays.push(uniqueArray)
+    // }
+    let arrays = []
+    const getTotalVol = async function (array, uniqueArray) {
 
+        // console.log(array)
+
+        if (!(uniqueArray.length)) {
+            uniqueArray.push(array[0])
+            array.shift();
+            if (array.length > 0) {
+                getTotalVol(array, uniqueArray)
+            }
+
+        } else {
+            for (let i = 0; i < uniqueArray.length; i++) {
+                if (array.length) {
+                    let token = array[0].op.orders[1].tokenSell;
+                    let amount = Number(array[0].op.orders[1].amount);
+                    if (uniqueArray[i].token == token) {
+                        uniqueArray[i].amount += amount
+                        array.shift();
+                        if (array.length > 0) {
+                            getTotalVol(array, uniqueArray)
+                        }
                     }
-                    console.log(grandTotal)
                 }
+            }
+            if (array.length) {
+                // console.log(`unique item: ${objArray[0].token}, pushing`)
+                let token = array[0].op.orders[1].tokenSell;
+                let amount = Number(array[0].op.orders[1].amount);
+                uniqueArray.push({ token: token, amount: amount });
 
-                setTotalVol(grandTotal)
-            })
-
+                array.shift();
+                if (array.length > 0) {
+                    // console.log('calling, objArray length = ', objArray.length)
+                    getTotalVol(array, uniqueArray)
+                }
+            }
+        }
+        arrays.push(uniqueArray)
     }
 
 
