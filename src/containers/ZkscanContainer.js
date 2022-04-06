@@ -79,15 +79,16 @@ const ZkscanContainer = () => {
                     getTransactions(address, data.result.list[99].txHash, 1)
                 } else {
                     getTotalVol(txArray)
-                        .then(() => {
-                            console.log(arrays[0])
-                            setUniques(arrays[0])
+                        .then((r) => {
+                            console.log(r)
+                            setUniques(r)
                         })
                 }
             })
     }
 
     const getTransactionVolume = async function (tx) {
+        // console.log(tx)
         let txVol = 0;
         let token = tx.token
         await fetch(`https://api.zksync.io/api/v0.2/tokens/${token}/priceIn/usd`)
@@ -103,7 +104,6 @@ const ZkscanContainer = () => {
         return txVol
     }
 
-    let arrays = []
     const getTotalVol = async function (array) {
 
         // console.log(array)
@@ -121,73 +121,22 @@ const ZkscanContainer = () => {
                 else {
                     tokensSoFar[token].push(amount)
                 }
-                console.log(tokensSoFar)
+                // console.log(tokensSoFar)
             }
             return tokensSoFar
         }, {});
 
         const keys = Object.keys(uniques);
 
+        let uniqueTxs = []
         for (let i = 0; i < keys.length; i++) {
             let key = keys[i]
-            console.log("token: ", key, " amount: ", uniques[key].reduce(
+            uniqueTxs.push({token: key, amount: uniques[key].reduce(
                 (previousValue, currentValue) => Number(previousValue) + Number(currentValue),
                 0
-            ))
+            )})
         }
-
-
-        // const groupByCategory = array.groupBy((product) => {
-        //     return product.op.orders[1].token;
-        // });
-        // const keys = Object.keys(groupByCategory);
-
-
-        // for (let i = 0; i < keys.length; i++) {
-        //     let key = keys[i]
-        //     console.log("token: ", key, " amount: ", groupByCategory[key].reduce(
-        //         (previousValue, currentValue) => previousValue + currentValue.amount,
-        //         0
-        //     ))
-        // }
-
-
-        // if (!(uniqueArray.length)) {
-        //     let token = array[0].op.orders[1].tokenSell;
-        //     let amount = Number(array[0].op.orders[1].amount);
-        //     uniqueArray.push({ token: token, amount: amount });
-        //     array.shift();
-        //     if (array.length > 0) {
-        //         getTotalVol(array, uniqueArray)
-        //     }
-
-        // } else {
-        //     for (let i = 0; i < uniqueArray.length; i++) {
-        //         if (array.length) {
-        //             let token = array[0].op.orders[1].tokenSell;
-        //             let amount = Number(array[0].op.orders[1].amount);
-        //             if (uniqueArray[i].token == token) {
-        //                 uniqueArray[i].amount += amount
-        //                 array.shift();
-        //                 if (array.length > 0) {
-        //                     getTotalVol(array, uniqueArray)
-        //                 }
-        //             }
-        //         }
-        //     }
-        //     if (array.length) {
-        //         // console.log(`unique item: ${objArray[0].token}, pushing`)
-        //         let token = array[0].op.orders[1].tokenSell;
-        //         let amount = Number(array[0].op.orders[1].amount);
-        //         uniqueArray.push({ token: token, amount: amount });
-
-        //         array.shift();
-        //         if (array.length > 0) {
-        //             // console.log('calling, objArray length = ', objArray.length)
-        //             getTotalVol(array, uniqueArray)
-        //         }
-        //     }
-        // }
+        return uniqueTxs
     }
 
     const getDecimals = async function (info) {
