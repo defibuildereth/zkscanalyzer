@@ -142,7 +142,6 @@ const ZkscanContainer = () => {
                 }
             }
         }
-        arrays.push(uniqueArray)
     }
 
     const getDecimals = async function (info) {
@@ -192,12 +191,12 @@ const ZkscanContainer = () => {
         }
 
         await Promise.all(promArray)
-        .then((values) => {
-            for (let i = 0; i < values.length; i++) {
-                grandTotal += values[i]
-            }
-            setTotalVol(grandTotal)
-        })
+            .then((values) => {
+                for (let i = 0; i < values.length; i++) {
+                    grandTotal += values[i]
+                }
+                setTotalVol(grandTotal)
+            })
     }
 
 
