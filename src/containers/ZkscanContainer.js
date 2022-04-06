@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import AddressForm from '../components/AddressForm';
-import "core-js/actual/array/group-by.js";
-
 
 const ZkscanContainer = () => {
 
     let total = 0;
-    let roughVol = 0;
     let txArray = [];
-
 
     const [address, setAddress] = useState("");
     const [info, setInfo] = useState("");
@@ -24,7 +20,6 @@ const ZkscanContainer = () => {
 
     useEffect(() => {
         getDecimals(info)
-        // console.log(nonce)
         getTransactions(address, 'latest', 0)
     }, [info])
 
@@ -36,7 +31,6 @@ const ZkscanContainer = () => {
         parseUniques(uniques)
     }, [uniques])
 
-
     const onAddressFormSubmit = (submittedAddress) => {
         setAddress(submittedAddress.submittedAddress)
     }
@@ -45,7 +39,6 @@ const ZkscanContainer = () => {
         fetch(`https://api.zksync.io/api/v0.2/accounts/${address}`)
             .then((res) => res.json())
             .then(data => {
-                // console.log(data)
                 setNonce(data.result.finalized.nonce)
                 setInfo(Object.entries(data.result.finalized.balances))
             })
@@ -54,24 +47,18 @@ const ZkscanContainer = () => {
     const parseInfo = (info) => {
         const nodes = info.map(item => {
             total = total + (Number(item.price) * item.balance * 10 ** (0 - item.decimals))
-            // total += (Number(item.price)*item.balance*10**(0-item.decimals))
             return <p>Token: {item.token} Balance: {(item.balance * 10 ** (0 - item.decimals)).toFixed(2)} Price: {Number(item.price).toFixed(2)} Value:{(Number(item.price) * item.balance * 10 ** (0 - item.decimals)).toFixed(2)}</p>
         })
-        // console.log('final total: ', total);
-        // setTotal(total)
         return nodes
     }
 
     const getTransactions = async function (address, tx, index) {
 
         console.log('calling getTransactions with tx: ', tx)
-        // console.log('hitting getTransactions: ', nonce, address)
         await fetch(`https://api.zksync.io/api/v0.2/accounts/${address}/transactions?from=${tx}&limit=100&direction=older`)
             .then((res) => res.json())
             .then(data => {
                 for (let i = index; i < data.result.list.length; i++) {
-                    // console.log(data.result.list[i])
-                    // txArray.push(data.result.list[i])
                     txArray.push(data.result.list[i])
                 }
 
@@ -80,7 +67,6 @@ const ZkscanContainer = () => {
                 } else {
                     getTotalVol(txArray)
                         .then((r) => {
-                            console.log(r)
                             setUniques(r)
                         })
                 }
@@ -88,32 +74,25 @@ const ZkscanContainer = () => {
     }
 
     const getTransactionVolume = async function (tx) {
-        // console.log(tx)
         let txVol = 0;
         let token = tx.token
         await fetch(`https://api.zksync.io/api/v0.2/tokens/${token}/priceIn/usd`)
             .then((res) => res.json())
             .then(data => {
-                // console.log(data)
                 let decimal = data.result.decimals;
                 let amount = tx.amount;
                 let price = data.result.price;
                 txVol = amount * 10 ** (0 - decimal) * price
-                // console.log(roughVol)
             })
         return txVol
     }
 
     const getTotalVol = async function (array) {
 
-        // console.log(array)
-
         const uniques = array.reduce((tokensSoFar, currentValue) => {
-            // console.log(currentValue)
             if (currentValue.op.type == "Swap") {
                 let token = currentValue.op.orders[1].tokenSell
                 let amount = currentValue.op.orders[1].amount
-                // console.log(token, amount)
                 if (!tokensSoFar[token]) {
                     tokensSoFar[token] = [];
                     tokensSoFar[token].push(amount);
@@ -121,7 +100,6 @@ const ZkscanContainer = () => {
                 else {
                     tokensSoFar[token].push(amount)
                 }
-                // console.log(tokensSoFar)
             }
             return tokensSoFar
         }, {});
@@ -174,7 +152,6 @@ const ZkscanContainer = () => {
                 tokenBalanceDecimalsArray.push({ token: info[i][0], balance: info[i][1], decimals: decimals[i].decimal, price: decimals[i].price })
             }
         }
-        // console.log(tokenBalanceDecimalsArray)
         setAllInfo(tokenBalanceDecimalsArray)
     }
 
@@ -194,7 +171,6 @@ const ZkscanContainer = () => {
             })
     }
 
-
     return (
         <>
             <h1>ZkScanalyzer by DefiBuilder.eth</h1>
@@ -202,15 +178,12 @@ const ZkscanContainer = () => {
             <h2>{address ? address : null}</h2>
             <h2>{address ? `Transactions: ${nonce}` : null}</h2>
             <h2>{totalVol ? `Ballpark Volume: $${totalVol.toFixed(2)}` : null}</h2>
-
             {allInfo ? <section>
                 {parseInfo(allInfo)}
             </section> : null}
             {total ? <h3 id="myID">${total.toFixed(2)}</h3> : null}
-
         </>
     )
-
 }
 
 export default ZkscanContainer;
