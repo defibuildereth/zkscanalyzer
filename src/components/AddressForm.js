@@ -23,7 +23,7 @@ const AddressForm = ({ onAddressFormSubmit }) => {
 
     return (
         <>
-            <form onSubmit={handleAddressSubmit}>
+            <form onSubmit={handleAddressSubmit} id="addressForm">
                 <input
                     type="text"
                     id="add"

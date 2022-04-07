@@ -47,10 +47,17 @@ const ZkscanContainer = () => {
     const parseInfo = (info) => {
         const nodes = info.map(item => {
             total = total + (Number(item.price) * item.balance * 10 ** (0 - item.decimals))
-            return <p>Token: {item.token} Balance: {(item.balance * 10 ** (0 - item.decimals)).toFixed(2)} Price: {Number(item.price).toFixed(2)} Value:{(Number(item.price) * item.balance * 10 ** (0 - item.decimals)).toFixed(2)}</p>
+            return <tr>
+                <td class="table-item">{item.token}</td>
+                <td class="table-item">{(item.balance * 10 ** (0 - item.decimals)).toFixed(2)}</td>
+                <td class="financial table-item">{Number(item.price).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
+                <td class="financial table-item">{(Number(item.price) * item.balance * 10 ** (0 - item.decimals)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
+            </tr>
         })
         return nodes
     }
+
+    // <p class="token">Token: {item.token} Balance: {(item.balance * 10 ** (0 - item.decimals)).toFixed(2)} Price: {Number(item.price).toFixed(2)} Value: {(Number(item.price) * item.balance * 10 ** (0 - item.decimals)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</p>
 
     const getTransactions = async function (address, tx, index) {
 
@@ -109,10 +116,12 @@ const ZkscanContainer = () => {
         let uniqueTxs = []
         for (let i = 0; i < keys.length; i++) {
             let key = keys[i]
-            uniqueTxs.push({token: key, amount: uniques[key].reduce(
-                (previousValue, currentValue) => Number(previousValue) + Number(currentValue),
-                0
-            )})
+            uniqueTxs.push({
+                token: key, amount: uniques[key].reduce(
+                    (previousValue, currentValue) => Number(previousValue) + Number(currentValue),
+                    0
+                )
+            })
         }
         return uniqueTxs
     }
@@ -174,14 +183,27 @@ const ZkscanContainer = () => {
     return (
         <>
             <h1>ZkScanalyzer by DefiBuilder.eth</h1>
-            <AddressForm onAddressFormSubmit={onAddressFormSubmit} />
-            <h2>{address ? address : null}</h2>
-            <h2>{address ? `Transactions: ${nonce}` : null}</h2>
-            <h2>{totalVol ? `Ballpark Volume: $${totalVol.toFixed(2)}` : null}</h2>
-            {allInfo ? <section>
-                {parseInfo(allInfo)}
-            </section> : null}
-            {total ? <h3 id="myID">${total.toFixed(2)}</h3> : null}
+            <div id="addressBox">
+                <AddressForm onAddressFormSubmit={onAddressFormSubmit} />
+                <p id="address">
+                    {address ? `Address : ${address}` : null}
+                </p>
+            </div>
+            <div id="resultsArea">
+                {address ? <section class="result" id="transactions">Transactions: {nonce} </section> : null}
+                {totalVol ? <section class="result">Ballpark Volume: {totalVol.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</section> : null}
+                </div>
+
+                {allInfo ? <table class="result">
+                    <tr>
+                        <th>Token</th>
+                        <th>Balance</th>
+                        <th>Price</th>
+                        <th>Value</th>
+                    </tr>
+                    {parseInfo(allInfo)} </table>
+                    : null}
+                <h2 id="myID">{total ? `Total Balance: ${total.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}` : null}</h2>
         </>
     )
 }

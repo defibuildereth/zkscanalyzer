@@ -2,6 +2,68 @@
   text-align: center;
 }
 
+h1 {
+  text-align: center;
+}
+
+#addressForm {
+  text-align: center;
+  padding-top: 10px;
+}
+
+#address {
+  text-align: center;
+}
+
+#addressBox {
+  border-style: solid;
+  border-radius: 12px;
+  border-color: #6debdc
+}
+
+#resultsArea {
+  display: flex;
+  justify-content: space-around;
+  padding: 12px;
+}
+
+body {
+  background-color: rgba(24,28,40,255);
+  color: #ffffff;
+}
+
+.financial {
+  text-align: right;
+}
+
+.table-item {
+  padding:1px 4em;
+  border-style: solid;
+  border-radius: 1px;
+  border-color: #282c34;
+}
+
+.my-ID {
+  text-align: right;
+}
+
+#tokens {
+  display:flex;
+  flex-direction: column;
+}
+
+.token {
+  text-align: right;
+  padding-right: 12px;
+}
+
+.result {
+  border-style: solid;
+  border-radius: 12px;
+  border-color: #6debdc;
+  padding: 12px
+}
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;
