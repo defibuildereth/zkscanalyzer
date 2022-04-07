@@ -32,6 +32,7 @@ const ZkscanContainer = () => {
     }, [uniques])
 
     const onAddressFormSubmit = (submittedAddress) => {
+        setTotalVol(0)
         setAddress(submittedAddress.submittedAddress)
     }
 
