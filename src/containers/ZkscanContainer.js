@@ -10,6 +10,7 @@ const ZkscanContainer = () => {
     const [info, setInfo] = useState("");
     const [decimals, setDecimals] = useState([]);
     const [allInfo, setAllInfo] = useState([]);
+    const [ethPrice, setEthPrice] = useState(0);
     const [nonce, setNonce] = useState("");
     const [totalVol, setTotalVol] = useState(0)
     const [uniques, setUniques] = useState([])
@@ -28,6 +29,10 @@ const ZkscanContainer = () => {
     }, [decimals])
 
     useEffect(() => {
+        getEthPrice(allInfo)
+    }, [allInfo])
+
+    useEffect(() => {
         parseUniques(uniques)
     }, [uniques])
 
@@ -43,6 +48,14 @@ const ZkscanContainer = () => {
                 setNonce(data.result.finalized.nonce)
                 setInfo(Object.entries(data.result.finalized.balances))
             })
+    }
+
+    const getEthPrice = async function (array) {
+        for (let i = 0; i < array.length; i++) {
+            if (array[i].token == "ETH") {
+                setEthPrice(array[i].price)
+            }
+        }
     }
 
     const parseInfo = (info) => {
@@ -162,6 +175,7 @@ const ZkscanContainer = () => {
                 tokenBalanceDecimalsArray.push({ token: info[i][0], balance: info[i][1], decimals: decimals[i].decimal, price: decimals[i].price })
             }
         }
+        // console.log(tokenBalanceDecimalsArray)
         setAllInfo(tokenBalanceDecimalsArray)
     }
 
@@ -204,7 +218,7 @@ const ZkscanContainer = () => {
                     </tr>
                     {parseInfo(allInfo)} </table>
                     : null}
-                <h2 id="myID">{total ? `Total Balance: ${total.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}` : null}</h2>
+                <h2 id="myID">{total ? `Total Balance: ${total.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}, or ${(total/ethPrice).toFixed(2)} ETH` : null}</h2>
         </>
     )
 }
