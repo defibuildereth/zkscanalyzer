@@ -14,6 +14,7 @@ const ZkscanContainer = () => {
     const [nonce, setNonce] = useState("");
     const [totalVol, setTotalVol] = useState(0)
     const [uniques, setUniques] = useState([])
+    const [txNumber, setTxNumber] = useState(0)
 
     useEffect(() => {
         searchAddress(address)
@@ -21,7 +22,7 @@ const ZkscanContainer = () => {
 
     useEffect(() => {
         getDecimals(info)
-        getTransactions(address, 'latest', 0)
+        getTransactions(address, 'latest', 0, 0)
     }, [info])
 
     useEffect(() => {
@@ -71,9 +72,7 @@ const ZkscanContainer = () => {
         return nodes
     }
 
-    // <p class="token">Token: {item.token} Balance: {(item.balance * 10 ** (0 - item.decimals)).toFixed(2)} Price: {Number(item.price).toFixed(2)} Value: {(Number(item.price) * item.balance * 10 ** (0 - item.decimals)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</p>
-
-    const getTransactions = async function (address, tx, index) {
+    const getTransactions = async function (address, tx, index, number) {
 
         console.log('calling getTransactions with tx: ', tx)
         await fetch(`https://api.zksync.io/api/v0.2/accounts/${address}/transactions?from=${tx}&limit=100&direction=older`)
@@ -84,8 +83,10 @@ const ZkscanContainer = () => {
                 }
 
                 if (data.result.list.length > 99) {
-                    getTransactions(address, data.result.list[99].txHash, 1)
+                    setTxNumber(number)
+                    getTransactions(address, data.result.list[99].txHash, 1, number + 100)
                 } else {
+                    setTxNumber(0)
                     getTotalVol(txArray)
                         .then((r) => {
                             setUniques(r)
@@ -206,19 +207,20 @@ const ZkscanContainer = () => {
             </div>
             <div id="resultsArea">
                 {address ? <section class="result" id="transactions">Transactions: {nonce} </section> : null}
+                {txNumber ? <section class="result">Loading volume: Transactions {txNumber} to {txNumber + 100} of {nonce}</section> : null}
                 {totalVol ? <section class="result">Ballpark Volume: {totalVol.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</section> : null}
-                </div>
+            </div>
 
-                {allInfo ? <table class="result">
-                    <tr>
-                        <th>Token</th>
-                        <th>Balance</th>
-                        <th>Price</th>
-                        <th>Value</th>
-                    </tr>
-                    {parseInfo(allInfo)} </table>
-                    : null}
-                <h2 id="myID">{total ? `Total Balance: ${total.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}, or ${(total/ethPrice).toFixed(2)} ETH` : null}</h2>
+            {allInfo ? <table class="result">
+                <tr>
+                    <th>Token</th>
+                    <th>Balance</th>
+                    <th>Price</th>
+                    <th>Value</th>
+                </tr>
+                {parseInfo(allInfo)} </table>
+                : null}
+            <h2 id="myID">{total ? `Total Balance: ${total.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}, or ${(total / ethPrice).toFixed(2)} ETH` : null}</h2>
         </>
     )
 }
