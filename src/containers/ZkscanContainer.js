@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AddressForm from '../components/AddressForm';
+import CsvDownloader from 'react-csv-downloader';
 
 const ZkscanContainer = () => {
 
@@ -196,6 +197,17 @@ const ZkscanContainer = () => {
             })
     }
 
+    const datas = [
+        {
+            cell1: 'row 1 - cell 1',
+            cell2: 'row 1 - cell 2',
+        },
+        {
+            cell1: 'row 2 - cell 1',
+            cell2: 'row 2 - cell 2',
+        },
+    ];
+
     return (
         <>
             <h1>ZkScanalyzer by DefiBuilder.eth</h1>
@@ -208,7 +220,10 @@ const ZkscanContainer = () => {
             <div id="resultsArea">
                 {address ? <section class="result" id="transactions">Transactions: {nonce} </section> : null}
                 {txNumber ? <section class="result">Loading volume: Transactions {txNumber} to {txNumber + 100} of {nonce}</section> : null}
-                {totalVol ? <section class="result">Ballpark Volume: {totalVol.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</section> : null}
+                {totalVol ? <section class="result">Ballpark Volume: {totalVol.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                    <CsvDownloader datas={datas} filename="info">
+                        <button>Download</button>
+                    </CsvDownloader></section> : null}
             </div>
 
             {allInfo ? <table class="result">
@@ -221,6 +236,7 @@ const ZkscanContainer = () => {
                 {parseInfo(allInfo)} </table>
                 : null}
             <h2 id="myID">{total ? `Total Balance: ${total.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}, or ${(total / ethPrice).toFixed(2)} ETH` : null}</h2>
+
         </>
     )
 }
