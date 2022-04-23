@@ -204,26 +204,26 @@ const ZkscanContainer = () => {
             })
     }
 
-    // datas = [
-    //     {
-    //         cell1: 'row 1 - cell 1',
-    //         cell2: 'row 1 - cell 2',
-    //     },
-    //     {
-    //         cell1: 'row 2 - cell 1',
-    //         cell2: 'row 2 - cell 2',
-    //     },
-    // ];
-
     const makeDatas = async function (array) {
         let datas=[];
         console.log(array)
-        for (let i = 0; i < 3; i++) {
-            datas.push({
-                txHash: array[i].txHash.toString(), 
-                nonce: array[i].op.nonce.toString(),
-                type: array[i].op.type.toString()
-            })
+        for (let i = 0; i < array.length; i++) {
+            if (array[i].op.type == "Swap") {
+                datas.push({
+                    txDate: array[i].createdAt.toString(),
+                    txHash: array[i].txHash.toString(), 
+                    nonce: array[i].op.nonce.toString(),
+                    type: array[i].op.type.toString(),
+                    BuyToken: array[i].op.orders[1].tokenBuy.toString(),
+                    BuyAmount: array[i].op.orders[1].amount.toString(),
+                    SellToken: array[i].op.orders[1].tokenSell.toString(),
+                    SellAmount: array[i].op.orders[0].amount.toString(),
+                    FeeToken: array[i].op.feeToken,
+                    FeeAmount: array[i].op.fee
+    
+                })
+            }
+            
         }
         return datas
     }
@@ -239,7 +239,7 @@ const ZkscanContainer = () => {
             </div>
             <div id="resultsArea">
                 {address ? <section class="result" id="transactions">Transactions: {nonce} </section> : null}
-                {txNumber ? <section class="result">Loading volume: Transactions {txNumber} to {txNumber + 100} of {nonce}</section> : null}
+                {txNumber ? <section class="result">Loading volume: Transactions {txNumber} to {Math.min(txNumber + 100, nonce)} of {nonce}</section> : null}
                 {totalVol ? <section class="result">Ballpark Volume: {totalVol.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
                     <CsvDownloader datas={datas} filename="info" prefix={true}>
                         <button>Download Transaction Info CSV</button>
@@ -256,7 +256,6 @@ const ZkscanContainer = () => {
                 {parseInfo(allInfo)} </table>
                 : null}
             <h2 id="myID">{total ? `Total Balance: ${total.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}, or ${(total / ethPrice).toFixed(2)} ETH` : null}</h2>
-
         </>
     )
 }
