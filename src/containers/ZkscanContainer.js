@@ -13,9 +13,10 @@ const ZkscanContainer = () => {
     const [allInfo, setAllInfo] = useState([]);
     const [ethPrice, setEthPrice] = useState(0);
     const [nonce, setNonce] = useState("");
-    const [totalVol, setTotalVol] = useState(0)
-    const [uniques, setUniques] = useState([])
-    const [txNumber, setTxNumber] = useState(0)
+    const [totalVol, setTotalVol] = useState(0);
+    const [uniques, setUniques] = useState([]);
+    const [txNumber, setTxNumber] = useState(0);
+    const [datas, setDatas] = useState([]);
 
     useEffect(() => {
         searchAddress(address)
@@ -88,7 +89,13 @@ const ZkscanContainer = () => {
                     getTransactions(address, data.result.list[99].txHash, 1, number + 100)
                 } else {
                     setTxNumber(0)
+                    makeDatas(txArray)
+                    .then((r) => {
+                        setDatas(r)
+                    })
+                    // console.log(datas)
                     getTotalVol(txArray)
+                    // console.log(txArray)
                         .then((r) => {
                             setUniques(r)
                         })
@@ -197,16 +204,29 @@ const ZkscanContainer = () => {
             })
     }
 
-    const datas = [
-        {
-            cell1: 'row 1 - cell 1',
-            cell2: 'row 1 - cell 2',
-        },
-        {
-            cell1: 'row 2 - cell 1',
-            cell2: 'row 2 - cell 2',
-        },
-    ];
+    // datas = [
+    //     {
+    //         cell1: 'row 1 - cell 1',
+    //         cell2: 'row 1 - cell 2',
+    //     },
+    //     {
+    //         cell1: 'row 2 - cell 1',
+    //         cell2: 'row 2 - cell 2',
+    //     },
+    // ];
+
+    const makeDatas = async function (array) {
+        let datas=[];
+        console.log(array)
+        for (let i = 0; i < 3; i++) {
+            datas.push({
+                txHash: array[i].txHash.toString(), 
+                nonce: array[i].op.nonce.toString(),
+                type: array[i].op.type.toString()
+            })
+        }
+        return datas
+    }
 
     return (
         <>
@@ -221,8 +241,8 @@ const ZkscanContainer = () => {
                 {address ? <section class="result" id="transactions">Transactions: {nonce} </section> : null}
                 {txNumber ? <section class="result">Loading volume: Transactions {txNumber} to {txNumber + 100} of {nonce}</section> : null}
                 {totalVol ? <section class="result">Ballpark Volume: {totalVol.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
-                    <CsvDownloader datas={datas} filename="info">
-                        <button>Download</button>
+                    <CsvDownloader datas={datas} filename="info" prefix={true}>
+                        <button>Download Transaction Info CSV</button>
                     </CsvDownloader></section> : null}
             </div>
 
