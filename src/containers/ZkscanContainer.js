@@ -90,12 +90,12 @@ const ZkscanContainer = () => {
                 } else {
                     setTxNumber(0)
                     makeDatas(txArray)
-                    .then((r) => {
-                        setDatas(r)
-                    })
+                        .then((r) => {
+                            setDatas(r)
+                        })
                     // console.log(datas)
                     getTotalVol(txArray)
-                    // console.log(txArray)
+                        // console.log(txArray)
                         .then((r) => {
                             setUniques(r)
                         })
@@ -121,14 +121,16 @@ const ZkscanContainer = () => {
 
         const uniques = array.reduce((tokensSoFar, currentValue) => {
             if (currentValue.op.type == "Swap") {
-                let token = currentValue.op.orders[1].tokenSell
-                let amount = currentValue.op.orders[1].amount
-                if (!tokensSoFar[token]) {
-                    tokensSoFar[token] = [];
-                    tokensSoFar[token].push(amount);
-                }
-                else {
-                    tokensSoFar[token].push(amount)
+                if (currentValue.status == "committed" || currentValue.status == "finalized") {
+                    let token = currentValue.op.orders[1].tokenSell
+                    let amount = currentValue.op.orders[1].amount
+                    if (!tokensSoFar[token]) {
+                        tokensSoFar[token] = [];
+                        tokensSoFar[token].push(amount);
+                    }
+                    else {
+                        tokensSoFar[token].push(amount)
+                    }
                 }
             }
             return tokensSoFar
@@ -205,13 +207,13 @@ const ZkscanContainer = () => {
     }
 
     const makeDatas = async function (array) {
-        let datas=[];
+        let datas = [];
         console.log(array)
         for (let i = 0; i < array.length; i++) {
             if (array[i].op.type == "Swap") {
                 datas.push({
                     txDate: array[i].createdAt.toString(),
-                    txHash: array[i].txHash.toString(), 
+                    txHash: array[i].txHash.toString(),
                     nonce: array[i].op.nonce.toString(),
                     type: array[i].op.type.toString(),
                     BuyToken: array[i].op.orders[1].tokenBuy.toString(),
@@ -220,10 +222,10 @@ const ZkscanContainer = () => {
                     SellAmount: array[i].op.orders[0].amount.toString(),
                     FeeToken: array[i].op.feeToken,
                     FeeAmount: array[i].op.fee
-    
+
                 })
             }
-            
+
         }
         return datas
     }
