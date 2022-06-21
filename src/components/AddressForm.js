@@ -26,6 +26,7 @@ const AddressForm = ({ onAddressFormSubmit }) => {
         <h4>Enter a valid address to get started</h4>
             <form onSubmit={handleAddressSubmit} id="addressForm">
                 <input
+                    size="50"
                     type="text"
                     id="add"
                     placeholder="Address"

@@ -253,10 +253,10 @@ const ZkscanContainer = () => {
                 {address ? <section class="result" id="transactions">Transactions: {nonce} </section> : null}
                 {txNumber ? <section class="result">Loading volume: Transactions {txNumber} to {Math.min(txNumber + 100, nonce)} of {nonce}</section> : null}
                 {totalVol ? <section id="volume" class="result">Ballpark Volume: {totalVol.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                    <h5>Note - not accurate! Volume is ballparked at today's prices</h5>
                     <CsvDownloader datas={datas} filename="info" prefix={true}>
                         <button>Download Transaction Info CSV</button>
-                    </CsvDownloader>
-                    <h5>Note - not accurate! Volume is ballparked at today's prices</h5></section> : null}
+                    </CsvDownloader></section> : null}
             </div>
 
             {allInfo ? <table class="result">

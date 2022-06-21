@@ -15,10 +15,25 @@ h6 {
   text-align: center;
 }
 
+#wrap {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: auto;
+  max-width: 60%;
+}
+
+@media (min-width: 768px) {
+  #wrap {
+    max-width: 90%;
+  }
+}
+
 #addressForm {
   text-align: center;
+  padding-top: 10px;
   display: flex;
-  justify-content: space-around;
+  justify-content: space-evenly;
 }
 
 #address {
@@ -35,14 +50,12 @@ h6 {
 #resultsArea {
   display: flex;
   justify-content: space-around;
-  padding: 5% 10%;
+  padding: 4% 10%;
 }
 
 body {
   background-color: rgba(24, 28, 40, 255);
   color: #ffffff;
-  display: flex;
-  margin: 0 0 0 25%;
 }
 
 .button-36 {
@@ -55,7 +68,7 @@ body {
   flex-shrink: 0;
   font-size: 18px;
   font-weight: 500;
-  height: 2rem;
+  height: 2em;
   padding: 0 1.6rem;
   text-align: center;
   text-shadow: rgba(0, 0, 0, 0.25) 0 3px 8px;
