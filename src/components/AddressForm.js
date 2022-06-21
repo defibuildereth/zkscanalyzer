@@ -23,6 +23,7 @@ const AddressForm = ({ onAddressFormSubmit }) => {
 
     return (
         <>
+        <h4>Enter a valid address to get started</h4>
             <form onSubmit={handleAddressSubmit} id="addressForm">
                 <input
                     type="text"
@@ -31,11 +32,7 @@ const AddressForm = ({ onAddressFormSubmit }) => {
                     value={submittedAddress}
                     onChange={handleAddressChange}
                 />
-                <input
-                    type="submit"
-                    id="searchsubmit"
-                    value="Search"
-                />
+                <button class="button-36" name="name" value="value" type="submit">Go!</button>
             </form>
         </>
     )

@@ -240,8 +240,9 @@ const ZkscanContainer = () => {
     }
 
     return (
-        <>
+        <><div id="wrap">
             <h1>ZkScanalyzer by DefiBuilder.eth</h1>
+            <h3>A <a href="https://trade.zigzag.exchange/">ZigZag</a> Community Project</h3>
             <div id="addressBox">
                 <AddressForm onAddressFormSubmit={onAddressFormSubmit} />
                 <p id="address">
@@ -251,10 +252,11 @@ const ZkscanContainer = () => {
             <div id="resultsArea">
                 {address ? <section class="result" id="transactions">Transactions: {nonce} </section> : null}
                 {txNumber ? <section class="result">Loading volume: Transactions {txNumber} to {Math.min(txNumber + 100, nonce)} of {nonce}</section> : null}
-                {totalVol ? <section class="result">Ballpark Volume: {totalVol.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                {totalVol ? <section id="volume" class="result">Ballpark Volume: {totalVol.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
                     <CsvDownloader datas={datas} filename="info" prefix={true}>
                         <button>Download Transaction Info CSV</button>
-                    </CsvDownloader></section> : null}
+                    </CsvDownloader>
+                    <h5>Note - not accurate! Volume is ballparked at today's prices</h5></section> : null}
             </div>
 
             {allInfo ? <table class="result">
@@ -267,6 +269,7 @@ const ZkscanContainer = () => {
                 {parseInfo(allInfo)} </table>
                 : null}
             <h2 id="myID">{total ? `Total Balance: ${total.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}, or ${(total / ethPrice).toFixed(2)} ETH` : null}</h2>
+        </div>
         </>
     )
 }

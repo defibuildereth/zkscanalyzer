@@ -2,13 +2,23 @@
   text-align: center;
 }
 
-h1 {
+a {
+  color: #6debdc
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   text-align: center;
 }
 
 #addressForm {
   text-align: center;
-  padding-top: 10px;
+  display: flex;
+  justify-content: space-around;
 }
 
 #address {
@@ -21,15 +31,49 @@ h1 {
   border-color: #6debdc
 }
 
+
 #resultsArea {
   display: flex;
   justify-content: space-around;
-  padding: 12px;
+  padding: 5% 10%;
 }
 
 body {
-  background-color: rgba(24,28,40,255);
+  background-color: rgba(24, 28, 40, 255);
   color: #ffffff;
+  display: flex;
+  margin: 0 0 0 25%;
+}
+
+.button-36 {
+  background-image: linear-gradient(92.88deg, #455EB5 9.16%, #5643CC 43.89%, #673FD7 64.72%);
+  border-radius: 8px;
+  border-style: none;
+  box-sizing: border-box;
+  color: #FFFFFF;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: 18px;
+  font-weight: 500;
+  height: 2rem;
+  padding: 0 1.6rem;
+  text-align: center;
+  text-shadow: rgba(0, 0, 0, 0.25) 0 3px 8px;
+  transition: all .5s;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.button-36:hover {
+  box-shadow: rgba(80, 63, 205, 0.5) 0 1px 30px;
+  transition-duration: .1s;
+}
+
+@media (min-width: 768px) {
+  .button-36 {
+    padding: 0 2.6rem;
+  }
 }
 
 .financial {
@@ -37,7 +81,7 @@ body {
 }
 
 .table-item {
-  padding:1px 4em;
+  padding: 1px 4em;
   border-style: solid;
   border-radius: 1px;
   border-color: #282c34;
@@ -48,7 +92,7 @@ body {
 }
 
 #tokens {
-  display:flex;
+  display: flex;
   flex-direction: column;
 }
 
@@ -94,6 +138,7 @@ body {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
