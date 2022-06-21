@@ -109,15 +109,20 @@ const ZkscanContainer = () => {
         await fetch(`https://api.zksync.io/api/v0.2/tokens/${token}/priceIn/usd`)
             .then((res) => res.json())
             .then(data => {
-                let decimal = data.result.decimals;
-                let amount = tx.amount;
-                let price = data.result.price;
-                txVol = amount * 10 ** (0 - decimal) * price
+                if (data.status == 'success') {
+                    let decimal = data.result.decimals;
+                    let amount = tx.amount;
+                    let price = data.result.price;
+                    txVol = amount * 10 ** (0 - decimal) * price
+                }
+
             })
         return txVol
     }
 
     const getTotalVol = async function (array) {
+
+        // console.log('calling getTotalVol')
 
         const uniques = array.reduce((tokensSoFar, currentValue) => {
             if (currentValue.op.type == "Swap") {
@@ -133,6 +138,7 @@ const ZkscanContainer = () => {
                     }
                 }
             }
+            // console.log(tokensSoFar)
             return tokensSoFar
         }, {});
 
@@ -148,6 +154,7 @@ const ZkscanContainer = () => {
                 )
             })
         }
+        console.log(uniqueTxs)
         return uniqueTxs
     }
 
@@ -191,6 +198,7 @@ const ZkscanContainer = () => {
     }
 
     const parseUniques = async function (array) {
+        // console.log('calling parseUniques')
         let grandTotal = 0
         let promArray = []
         for (let i = 0; i < array.length; i++) {
@@ -199,6 +207,7 @@ const ZkscanContainer = () => {
 
         await Promise.all(promArray)
             .then((values) => {
+                console.log('values', values)
                 for (let i = 0; i < values.length; i++) {
                     grandTotal += values[i]
                 }
@@ -216,9 +225,9 @@ const ZkscanContainer = () => {
                     txHash: array[i].txHash.toString(),
                     nonce: array[i].op.nonce.toString(),
                     type: array[i].op.type.toString(),
-                    BuyToken: array[i].op.orders[1].tokenBuy.toString(),
-                    BuyAmount: array[i].op.orders[1].amount.toString(),
-                    SellToken: array[i].op.orders[1].tokenSell.toString(),
+                    BuyToken: array[i].op.orders[0].tokenBuy.toString(),
+                    BuyAmount: array[i].op.orders[0].amount.toString(),
+                    SellToken: array[i].op.orders[0].tokenSell.toString(),
                     SellAmount: array[i].op.orders[0].amount.toString(),
                     FeeToken: array[i].op.feeToken,
                     FeeAmount: array[i].op.fee
