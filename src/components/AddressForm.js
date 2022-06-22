@@ -1,43 +1,20 @@
-import React, { useState } from "react";
+import React from "react";
+import { useForm } from "react-hook-form";
 
-const AddressForm = ({ onAddressFormSubmit }) => {
+export default function AddressForm({ onAddressFormSubmit }) {
+    const { register, handleSubmit, watch, formState: { errors } } = useForm();
+    const onSubmit = data => onAddressFormSubmit(data);
 
-    const [submittedAddress, setSubmittedAddress] = useState("")
-
-    const handleAddressChange = (evt) => {
-        setSubmittedAddress(evt.target.value);
-    }
-
-    const handleAddressSubmit = (evt) => {
-        evt.preventDefault();
-        const addressToSubmit = submittedAddress.trim();
-        if (!addressToSubmit) {
-            return
-        }
-
-        onAddressFormSubmit({
-            submittedAddress: addressToSubmit,
-        });
-        setSubmittedAddress("");
-    }
 
     return (
-        <>
-        <h4>Enter a valid address to get started</h4>
-            <form onSubmit={handleAddressSubmit} id="addressForm">
-                <input
-                    size="50"
-                    type="text"
-                    id="add"
-                    placeholder="Address"
-                    value={submittedAddress}
-                    onChange={handleAddressChange}
-                />
-                <button class="button-36" name="name" value="value" type="submit">Go!</button>
-            </form>
-        </>
-    )
-
+        <form id="addressForm" onSubmit={handleSubmit(onSubmit)}>
+            <input id="add" size="50" placeholder="Address" {...register("address", {
+                required: true, pattern: {
+                    value: /^0x[a-fA-F0-9]{40}$/,
+                    message: "invalid eth address"
+                }
+            })} />
+            <button class="button-36" name="name" value="value" type="submit">Go!</button>
+        </form>
+    );
 }
-
-export default AddressForm

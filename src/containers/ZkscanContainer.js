@@ -41,7 +41,7 @@ const ZkscanContainer = () => {
 
     const onAddressFormSubmit = (input) => {
         setTotalVol(0)
-        setAddress(input.submittedAddress)
+        setAddress(input.address)
     }
 
     const searchAddress = (address) => {
