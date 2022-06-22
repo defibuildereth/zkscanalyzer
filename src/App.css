@@ -31,26 +31,36 @@ h6 {
 
 #addressForm {
   text-align: center;
-  padding-top: 10px;
+  padding-top: 1%;
   display: flex;
   justify-content: space-evenly;
 }
 
 #address {
   text-align: center;
+  flex-shrink: 2;
+}
+
+@media (max-width: 768px) {
+  #add {
+    max-width: 50%;
+  }
 }
 
 #addressBox {
   border-style: solid;
-  border-radius: 12px;
-  border-color: #6debdc
+  border-radius: 4%;
+  border-color: #6debdc;
+  display: flex;
+  flex-direction: column;
 }
 
 
 #resultsArea {
   display: flex;
-  justify-content: space-around;
-  padding: 4% 10%;
+  flex-direction: row;
+  justify-content: space-evenly;
+  padding: 2% 5%;
 }
 
 body {
@@ -96,7 +106,7 @@ body {
 .table-item {
   padding: 1px 4em;
   border-style: solid;
-  border-radius: 1px;
+  border-radius: 2px;
   border-color: #282c34;
 }
 
@@ -111,20 +121,16 @@ body {
 
 .token {
   text-align: right;
-  padding-right: 12px;
+  padding-right: 0.5em;
 }
 
 .result {
   border-style: solid;
   border-radius: 12px;
   border-color: #6debdc;
-  padding: 12px
+  padding: 1em
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
 
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
