@@ -7,7 +7,7 @@ export default function AddressForm({ onAddressFormSubmit }) {
 
 
     return (
-        <form id="addressForm" aria-invalid={errors.address ? "true" : "false"} onSubmit={handleSubmit(onSubmit)}>
+        <><h4>Enter an Ethereum address to get started</h4><form id="addressForm" aria-invalid={errors.address ? "true" : "false"} onSubmit={handleSubmit(onSubmit)}>
             <input id="add" size="50" placeholder="Address" {...register("address", {
                 required: true, pattern: {
                     value: /^0x[a-fA-F0-9]{40}$/,
@@ -20,6 +20,6 @@ export default function AddressForm({ onAddressFormSubmit }) {
                 </span>
             )}
             <button class="button-36" name="name" value="value" type="submit">Go!</button>
-        </form>
+        </form></>
     );
 }
