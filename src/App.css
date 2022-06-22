@@ -13,7 +13,9 @@ h4,
 h5,
 h6 {
   text-align: center;
+  margin: 2.5% auto;
 }
+
 
 #wrap {
   display: flex;
@@ -38,7 +40,7 @@ h6 {
 
 #address {
   text-align: center;
-  flex-shrink: 2;
+  flex-shrink: 4;
 }
 
 @media (max-width: 768px) {
@@ -49,10 +51,11 @@ h6 {
 
 #addressBox {
   border-style: solid;
-  border-radius: 4%;
+  border-radius: 8px;
   border-color: #6debdc;
   display: flex;
   flex-direction: column;
+  margin: 2%;
 }
 
 
@@ -126,9 +129,10 @@ body {
 
 .result {
   border-style: solid;
-  border-radius: 12px;
+  border-radius: 8px;
   border-color: #6debdc;
-  padding: 1em
+  padding: 0.5em;
+  margin: 0.5em;
 }
 
 

@@ -39,9 +39,9 @@ const ZkscanContainer = () => {
         parseUniques(uniques)
     }, [uniques])
 
-    const onAddressFormSubmit = (submittedAddress) => {
+    const onAddressFormSubmit = (input) => {
         setTotalVol(0)
-        setAddress(submittedAddress.submittedAddress)
+        setAddress(input.submittedAddress)
     }
 
     const searchAddress = (address) => {
