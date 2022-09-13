@@ -16,7 +16,6 @@ h6 {
   margin: 2.5% auto;
 }
 
-
 #wrap {
   display: flex;
   flex-direction: column;
@@ -69,6 +68,15 @@ h6 {
 body {
   background-color: rgba(24, 28, 40, 255);
   color: #ffffff;
+}
+
+#footer {
+  position: relative;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 3px;
+  text-size-adjust: 60%;
 }
 
 .button-36 {
