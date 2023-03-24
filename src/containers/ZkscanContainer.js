@@ -29,23 +29,6 @@ const ZkscanContainer = () => {
         let totalVol = await parseUniques(uniques)
     }, [address])
 
-    // useEffect(() => {
-    //     getDecimals(info)
-    //     getTransactions(address, 'latest', 0, 0)
-    // }, [info])
-
-    // useEffect(() => {
-    //     parsePrices(info, decimals)
-    // }, [decimals])
-
-    // useEffect(() => {
-    //     getEthPrice(allInfo)
-    // }, [allInfo])
-
-    // useEffect(() => {
-    //     parseUniques(uniques)
-    // }, [uniques])
-
     const onAddressFormSubmit = (input) => {
         setTotalVol(0)
         setAddress(input.address)
