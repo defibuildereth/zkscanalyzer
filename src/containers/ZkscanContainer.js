@@ -18,45 +18,56 @@ const ZkscanContainer = () => {
     const [txNumber, setTxNumber] = useState(0);
     const [datas, setDatas] = useState([]);
 
-    useEffect(() => {
-        searchAddress(address)
+    useEffect(async () => {
+        let balances = await searchAddress(address)
+        let uniques = await getTransactions(address, 'latest', 0, 0)
+        // console.log(balances, uniques)
+        let decimals = await getDecimals(balances)
+        // console.log(decimals)
+        let allInfo = parsePrices(balances, decimals)
+        let ethPrice = getEthPrice(allInfo)
+        let totalVol = await parseUniques(uniques)
     }, [address])
 
-    useEffect(() => {
-        getDecimals(info)
-        getTransactions(address, 'latest', 0, 0)
-    }, [info])
+    // useEffect(() => {
+    //     getDecimals(info)
+    //     getTransactions(address, 'latest', 0, 0)
+    // }, [info])
 
-    useEffect(() => {
-        parsePrices(info, decimals)
-    }, [decimals])
+    // useEffect(() => {
+    //     parsePrices(info, decimals)
+    // }, [decimals])
 
-    useEffect(() => {
-        getEthPrice(allInfo)
-    }, [allInfo])
+    // useEffect(() => {
+    //     getEthPrice(allInfo)
+    // }, [allInfo])
 
-    useEffect(() => {
-        parseUniques(uniques)
-    }, [uniques])
+    // useEffect(() => {
+    //     parseUniques(uniques)
+    // }, [uniques])
 
     const onAddressFormSubmit = (input) => {
         setTotalVol(0)
         setAddress(input.address)
     }
 
-    const searchAddress = (address) => {
-        fetch(`https://api.zksync.io/api/v0.2/accounts/${address}`)
-            .then((res) => res.json())
-            .then(data => {
-                setNonce(data.result.finalized.nonce)
-                setInfo(Object.entries(data.result.finalized.balances))
-            })
+    async function searchAddress(address) {
+        try {
+            const res = await fetch(`https://api.zksync.io/api/v0.2/accounts/${address}`);
+            const data = await res.json();
+            setNonce(data.result.finalized.nonce);
+            setInfo(Object.entries(data.result.finalized.balances));
+            return Object.entries(data.result.finalized.balances)
+        } catch (error) {
+            console.log(error);
+        }
     }
 
-    const getEthPrice = async function (array) {
+    const getEthPrice = function (array) {
         for (let i = 0; i < array.length; i++) {
             if (array[i].token == "ETH") {
                 setEthPrice(array[i].price)
+                return array[i].price
             }
         }
     }
@@ -74,51 +85,51 @@ const ZkscanContainer = () => {
         return nodes
     }
 
-    const getTransactions = async function (address, tx, index, number) {
+    async function getTransactions(address, tx, index, number) {
+        try {
+            console.log('calling getTransactions with tx: ', tx);
+            const res = await fetch(`https://api.zksync.io/api/v0.2/accounts/${address}/transactions?from=${tx}&limit=100&direction=older`);
+            const data = await res.json();
+            const txArray = [];
 
-        console.log('calling getTransactions with tx: ', tx)
-        await fetch(`https://api.zksync.io/api/v0.2/accounts/${address}/transactions?from=${tx}&limit=100&direction=older`)
-            .then((res) => res.json())
-            .then(data => {
-                for (let i = index; i < data.result.list.length; i++) {
-                    txArray.push(data.result.list[i])
-                }
+            for (let i = index; i < data.result.list.length; i++) {
+                txArray.push(data.result.list[i]);
+            }
 
-                if (data.result.list.length > 99) {
-                    setTxNumber(number)
-                    getTransactions(address, data.result.list[99].txHash, 1, number + 100)
-                } else {
-                    setTxNumber(0)
-                    makeDatas(txArray)
-                        .then((r) => {
-                            setDatas(r)
-                        })
-                    // console.log(datas)
-                    getTotalVol(txArray)
-                        // console.log(txArray)
-                        .then((r) => {
-                            setUniques(r)
-                        })
-                }
-            })
+            if (data.result.list.length > 99) {
+                const r = await getTransactions(address, data.result.list[99].txHash, 1, number + 100);
+                return txArray.concat(r);
+            } else {
+                const r1 = await makeDatas(txArray);
+                setDatas(r1);
+                const r2 = await getTotalVol(txArray);
+                setUniques(r2);
+                return txArray;
+            }
+        } catch (error) {
+            console.log(error);
+            return [];
+        }
     }
+
 
     const getTransactionVolume = async function (tx) {
         let txVol = 0;
-        let token = tx.token
-        await fetch(`https://api.zksync.io/api/v0.2/tokens/${token}/priceIn/usd`)
-            .then((res) => res.json())
-            .then(data => {
-                if (data.status == 'success') {
-                    let decimal = data.result.decimals;
-                    let amount = tx.amount;
-                    let price = data.result.price;
-                    txVol = amount * 10 ** (0 - decimal) * price
-                }
+        let token = tx.token;
 
-            })
-        return txVol
+        const res = await fetch(`https://api.zksync.io/api/v0.2/tokens/${token}/priceIn/usd`);
+        const data = await res.json();
+
+        if (data.status == 'success') {
+            let decimal = data.result.decimals;
+            let amount = tx.amount;
+            let price = data.result.price;
+            txVol = amount * 10 ** (0 - decimal) * price;
+        }
+
+        return txVol;
     }
+
 
     const getTotalVol = async function (array) {
 
@@ -159,32 +170,28 @@ const ZkscanContainer = () => {
     }
 
     const getDecimals = async function (info) {
-        let decimalsPromiseArray = []
+        const decimalsPromiseArray = [];
 
         for (let i = 0; i < info.length; i++) {
             let token = info[i][0];
-            decimalsPromiseArray.push(getTokenDecimal(token))
+            decimalsPromiseArray.push(getTokenDecimal(token));
         }
 
-        await Promise.all(decimalsPromiseArray)
-            .then((values) => {
-                setDecimals(values)
-            }
-            )
+        const values = await Promise.all(decimalsPromiseArray);
+        setDecimals(values);
+
+        return values;
     }
+
 
     const getTokenDecimal = async function (token) {
-        let decimal;
-        let price;
-        await fetch(`https://api.zksync.io/api/v0.2/tokens/${token}/priceIn/usd`)
-            .then((res) => res.json())
-            .then(data => {
-                decimal = data.result.decimals;
-                price = data.result.price;
-            })
-
+        const res = await fetch(`https://api.zksync.io/api/v0.2/tokens/${token}/priceIn/usd`);
+        const data = await res.json();
+        const decimal = data.result.decimals;
+        const price = data.result.price;
         return ({ token: token, decimal: decimal, price: price })
     }
+
 
     const parsePrices = function (info, decimals) {
         let tokenBalanceDecimalsArray = []
@@ -195,25 +202,27 @@ const ZkscanContainer = () => {
         }
         // console.log(tokenBalanceDecimalsArray)
         setAllInfo(tokenBalanceDecimalsArray)
+        return (tokenBalanceDecimalsArray)
     }
 
     const parseUniques = async function (array) {
-        // console.log('calling parseUniques')
-        let grandTotal = 0
-        let promArray = []
+        let grandTotal = 0;
+        let promArray = [];
+
         for (let i = 0; i < array.length; i++) {
-            promArray.push(getTransactionVolume(array[i]))
+            promArray.push(getTransactionVolume(array[i]));
         }
 
-        await Promise.all(promArray)
-            .then((values) => {
-                console.log('values', values)
-                for (let i = 0; i < values.length; i++) {
-                    grandTotal += values[i]
-                }
-                setTotalVol(grandTotal)
-            })
+        const values = await Promise.all(promArray);
+
+        for (let i = 0; i < values.length; i++) {
+            grandTotal += values[i];
+        }
+
+        setTotalVol(grandTotal);
+        return (grandTotal)
     }
+
 
     const makeDatas = async function (array) {
         let datas = [];
