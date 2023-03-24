@@ -20,13 +20,16 @@ const ZkscanContainer = () => {
 
     useEffect(async () => {
         let balances = await searchAddress(address)
-        let uniques = await getTransactions(address, 'latest', 0, 0)
-        // console.log(balances, uniques)
         let decimals = await getDecimals(balances)
         // console.log(decimals)
         let allInfo = parsePrices(balances, decimals)
         let ethPrice = getEthPrice(allInfo)
+        let allTransactions = await getTransactions(address, 'latest', 0, 0)
+        console.log(balances, allTransactions.length)
+        let uniques = getTotalVol(allTransactions)
+        console.log(uniques)
         let totalVol = await parseUniques(uniques)
+        console.log('totalVol: ', totalVol)
     }, [address])
 
     const onAddressFormSubmit = (input) => {
@@ -69,6 +72,7 @@ const ZkscanContainer = () => {
     }
 
     async function getTransactions(address, tx, index, number) {
+        setTxNumber(number)
         try {
             console.log('calling getTransactions with tx: ', tx);
             const res = await fetch(`https://api.zksync.io/api/v0.2/accounts/${address}/transactions?from=${tx}&limit=100&direction=older`);
@@ -86,6 +90,7 @@ const ZkscanContainer = () => {
                 const r1 = await makeDatas(txArray);
                 setDatas(r1);
                 const r2 = await getTotalVol(txArray);
+                console.log(r2, txArray.length)
                 setUniques(r2);
                 return txArray;
             }
@@ -99,7 +104,6 @@ const ZkscanContainer = () => {
     const getTransactionVolume = async function (tx) {
         let txVol = 0;
         let token = tx.token;
-
         const res = await fetch(`https://api.zksync.io/api/v0.2/tokens/${token}/priceIn/usd`);
         const data = await res.json();
 
@@ -114,7 +118,7 @@ const ZkscanContainer = () => {
     }
 
 
-    const getTotalVol = async function (array) {
+    const getTotalVol = function (array) {
 
         // console.log('calling getTotalVol')
 
@@ -148,7 +152,6 @@ const ZkscanContainer = () => {
                 )
             })
         }
-        console.log(uniqueTxs)
         return uniqueTxs
     }
 
@@ -201,7 +204,6 @@ const ZkscanContainer = () => {
         for (let i = 0; i < values.length; i++) {
             grandTotal += values[i];
         }
-
         setTotalVol(grandTotal);
         return (grandTotal)
     }
@@ -209,7 +211,6 @@ const ZkscanContainer = () => {
 
     const makeDatas = async function (array) {
         let datas = [];
-        console.log(array)
         for (let i = 0; i < array.length; i++) {
             if (array[i].op.type == "Swap") {
                 datas.push({
@@ -223,10 +224,8 @@ const ZkscanContainer = () => {
                     SellAmount: array[i].op.orders[0].amount.toString(),
                     FeeToken: array[i].op.feeToken,
                     FeeAmount: array[i].op.fee
-
                 })
             }
-
         }
         return datas
     }
