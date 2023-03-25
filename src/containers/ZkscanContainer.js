@@ -14,7 +14,6 @@ const ZkscanContainer = () => {
     const [ethPrice, setEthPrice] = useState(0);
     const [nonce, setNonce] = useState("");
     const [totalVol, setTotalVol] = useState(0);
-    const [uniques, setUniques] = useState([]);
     const [txNumber, setTxNumber] = useState(0);
     const [datas, setDatas] = useState([]);
 
@@ -23,7 +22,7 @@ const ZkscanContainer = () => {
         let decimals = await getDecimals(balances)
         // console.log(decimals)
         let allInfo = parsePrices(balances, decimals)
-        let ethPrice = getEthPrice(allInfo)
+        getEthPrice(allInfo)
         let allTransactions = await getTransactions(address, 'latest', 0, 0)
         console.log(balances, allTransactions.length)
         let uniques = getTotalVol(allTransactions)
@@ -51,7 +50,7 @@ const ZkscanContainer = () => {
 
     const getEthPrice = function (array) {
         for (let i = 0; i < array.length; i++) {
-            if (array[i].token == "ETH") {
+            if (array[i].token === "ETH") {
                 setEthPrice(array[i].price)
                 return array[i].price
             }
@@ -87,11 +86,12 @@ const ZkscanContainer = () => {
                 const r = await getTransactions(address, data.result.list[99].txHash, 1, number + 100);
                 return txArray.concat(r);
             } else {
+                setTxNumber(0)
                 const r1 = await makeDatas(txArray);
                 setDatas(r1);
                 const r2 = await getTotalVol(txArray);
-                console.log(r2, txArray.length)
-                setUniques(r2);
+                // console.log(r2, txArray.length)
+                // setUniques(r2);
                 return txArray;
             }
         } catch (error) {
@@ -107,7 +107,7 @@ const ZkscanContainer = () => {
         const res = await fetch(`https://api.zksync.io/api/v0.2/tokens/${token}/priceIn/usd`);
         const data = await res.json();
 
-        if (data.status == 'success') {
+        if (data.status === 'success') {
             let decimal = data.result.decimals;
             let amount = tx.amount;
             let price = data.result.price;
@@ -123,8 +123,8 @@ const ZkscanContainer = () => {
         // console.log('calling getTotalVol')
 
         const uniques = array.reduce((tokensSoFar, currentValue) => {
-            if (currentValue.op.type == "Swap") {
-                if (currentValue.status == "committed" || currentValue.status == "finalized") {
+            if (currentValue.op.type === "Swap") {
+                if (currentValue.status === "committed" || currentValue.status === "finalized") {
                     let token = currentValue.op.orders[1].tokenSell
                     let amount = currentValue.op.orders[1].amount
                     if (!tokensSoFar[token]) {
@@ -182,7 +182,7 @@ const ZkscanContainer = () => {
     const parsePrices = function (info, decimals) {
         let tokenBalanceDecimalsArray = []
         for (let i = 0; i < info.length; i++) {
-            if (info[i][0] == decimals[i].token) {
+            if (info[i][0] === decimals[i].token) {
                 tokenBalanceDecimalsArray.push({ token: info[i][0], balance: info[i][1], decimals: decimals[i].decimal, price: decimals[i].price })
             }
         }
@@ -212,7 +212,7 @@ const ZkscanContainer = () => {
     const makeDatas = async function (array) {
         let datas = [];
         for (let i = 0; i < array.length; i++) {
-            if (array[i].op.type == "Swap") {
+            if (array[i].op.type === "Swap") {
                 datas.push({
                     txDate: array[i].createdAt.toString(),
                     txHash: array[i].txHash.toString(),
