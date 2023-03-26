@@ -15,7 +15,7 @@ const Results = ({ }) => {
     const [totalVol, setTotalVol] = useState(0);
     const [txNumber, setTxNumber] = useState(0);
     const [datas, setDatas] = useState([]);
-    
+
 
     useEffect(async () => {
         setTotalVol(0)
@@ -222,6 +222,8 @@ const Results = ({ }) => {
     }
 
     return (<>
+        <h2>Results for <a href={'https://zkscan.io/explorer/accounts/' + address}>{address}</a></h2>
+
         <div id="resultsArea">
             {address ? <section class="result" id="transactions">Transactions: {nonce} </section> : null}
             {txNumber ? <section class="result">Loading volume: Transactions {txNumber} to {Math.min(txNumber + 100, nonce)} of {nonce}</section> : null}
