@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import AddressForm from '../components/AddressForm';
-import Results from '../components/Results';
+// import Results from '../components/Results';
 
 
 const Home = ({ }) => {
@@ -9,9 +9,12 @@ const Home = ({ }) => {
     const [address, setAddress] = useState("");
     const [totalVol, setTotalVol] = useState(0);
 
+    const history = useHistory();
+
     const onAddressFormSubmit = (input) => {
         setTotalVol(0)
         setAddress(input.address)
+        history.push(`/${address}`);
     }
 
     return (
@@ -23,7 +26,7 @@ const Home = ({ }) => {
                 <p id="address">
                     {address ? `Address : ${address}` : null}
                 </p>
-                {address? <Results address={address}></Results> : null}
+                {/* {address? <Results address={address}></Results> : null} */}
             </div>
         </>
     )

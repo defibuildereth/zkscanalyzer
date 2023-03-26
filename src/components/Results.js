@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import CsvDownloader from 'react-csv-downloader';
 
 
-const Results = ({ address }) => {
+const Results = ({ }) => {
+    const { address } = useParams();
     let total = 0;
 
-    // const { address } = address
-
-    // const [address, setAddress] = useState("");
     const [info, setInfo] = useState("");
     const [decimals, setDecimals] = useState([]);
     const [allInfo, setAllInfo] = useState([]);
@@ -16,8 +15,10 @@ const Results = ({ address }) => {
     const [totalVol, setTotalVol] = useState(0);
     const [txNumber, setTxNumber] = useState(0);
     const [datas, setDatas] = useState([]);
+    
 
     useEffect(async () => {
+        setTotalVol(0)
         let balances = await searchAddress(address)
         let decimals = await getDecimals(balances)
         // console.log(decimals)
