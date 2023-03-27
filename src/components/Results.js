@@ -16,17 +16,18 @@ const Results = ({ }) => {
     const [txNumber, setTxNumber] = useState(0);
     const [datas, setDatas] = useState([]);
 
+    let cache = new Map()
 
     useEffect(async () => {
         setTotalVol(0)
         let balances = await searchAddress(address)
         let decimals = await getDecimals(balances)
-        // console.log(decimals)
+        console.log(decimals)
         let allInfo = parsePrices(balances, decimals)
         getEthPrice(allInfo)
         let allTransactions = await getTransactions(address, 'latest', 0, 0)
         console.log(balances, allTransactions)
-        const data = makeDatas(allTransactions);
+        const data = makeDatas(allTransactions, decimals);
         setDatas(data);
         let uniques = getTotalVol(allTransactions)
         console.log(uniques)
@@ -68,8 +69,10 @@ const Results = ({ }) => {
         }
 
         const values = await Promise.all(decimalsPromiseArray);
+        for (let i = 0; i < values.length; i++) {
+            cache.set(values[i].tokenId, values[i].decimal)
+        }
         setDecimals(values);
-
         return values;
     }
 
@@ -78,7 +81,7 @@ const Results = ({ }) => {
         const data = await res.json();
         const decimal = data.result.decimals;
         const price = data.result.price;
-        return ({ token: token, decimal: decimal, price: price })
+        return ({ tokenId: data.result.tokenId, token: token, decimal: decimal, price: price })
     }
 
     const parsePrices = function (info, decimals) {
@@ -200,21 +203,40 @@ const Results = ({ }) => {
         return txVol;
     }
 
-    const makeDatas = function (array) {
+    const getDecimal = async function (token, array) {
+        let decimal;
+
+        if (cache.get(token)) {
+            return cache.get(token)
+        } else {
+            let res = await getTokenDecimal(token)
+            cache.set(token, res.decimal)
+            decimal = res.decimal
+            return decimal
+        }
+    }
+
+    const makeDatas = async function (array, decimals) {
         let datas = [];
         for (let i = 0; i < array.length; i++) {
             if (array[i].op.type === "Swap") {
+                let buyToken = array[i].op.orders[0].tokenBuy.toString();
+                let sellToken = array[i].op.orders[0].tokenSell.toString();
+                let feeToken = array[i].op.feeToken;
                 datas.push({
                     txDate: array[i].createdAt.toString(),
                     txHash: array[i].txHash.toString(),
                     nonce: array[i].op.nonce.toString(),
                     type: array[i].op.type.toString(),
-                    BuyToken: array[i].op.orders[0].tokenBuy.toString(),
-                    BuyAmount: array[i].op.orders[0].amount.toString(),
-                    SellToken: array[i].op.orders[0].tokenSell.toString(),
-                    SellAmount: array[i].op.orders[0].amount.toString(),
-                    FeeToken: array[i].op.feeToken,
-                    FeeAmount: array[i].op.fee
+                    buyToken: buyToken,
+                    buyAmount: array[i].op.orders[0].amount.toString(),
+                    buyTokenDecimals: await getDecimal(buyToken, decimals),
+                    sellToken: array[i].op.orders[0].tokenSell.toString(),
+                    sellAmount: array[i].op.orders[1].amount.toString(),
+                    sellTokenDecimals: await getDecimal(sellToken, decimals),
+                    feeToken: array[i].op.feeToken,
+                    feeAmount: array[i].op.fee,
+                    feeTokenDecimals: await getDecimal(feeToken, decimals)
                 })
             }
         }
