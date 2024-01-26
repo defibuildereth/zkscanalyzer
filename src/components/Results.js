@@ -27,10 +27,11 @@ const Results = ({ }) => {
         getEthPrice(allInfo)
         let allTransactions = await getTransactions(address, 'latest', 0, 0)
         console.log(balances, allTransactions)
-        const data = makeDatas(allTransactions, decimals);
+        const data = await makeDatas(allTransactions, decimals);
         setDatas(data);
+        console.log(data)
         let uniques = getTotalVol(allTransactions)
-        console.log(uniques)
+        // console.log(uniques)
         let totalVol = await parseUniques(uniques)
         console.log('totalVol: ', totalVol)
     }, [address])
@@ -70,7 +71,8 @@ const Results = ({ }) => {
 
         const values = await Promise.all(decimalsPromiseArray);
         for (let i = 0; i < values.length; i++) {
-            cache.set(values[i].tokenId, values[i].decimal)
+            cache.set(values[i].tokenId, { decimal: values[i].decimal, symbol: values[i].symbol })
+            // cache.set(values[i].tokenId, values[i].decimal)
         }
         setDecimals(values);
         return values;
@@ -81,7 +83,8 @@ const Results = ({ }) => {
         const data = await res.json();
         const decimal = data.result.decimals;
         const price = data.result.price;
-        return ({ tokenId: data.result.tokenId, token: token, decimal: decimal, price: price })
+        const symbol = data.result.tokenSymbol
+        return ({ tokenId: data.result.tokenId, token: token, decimal: decimal, price: price, symbol: symbol })
     }
 
     const parsePrices = function (info, decimals) {
@@ -203,26 +206,29 @@ const Results = ({ }) => {
         return txVol;
     }
 
-    const getDecimal = async function (token, array) {
-        let decimal;
+    const getInfo = async function (token) {
+        let decimal, symbol;
 
         if (cache.get(token)) {
             return cache.get(token)
         } else {
             let res = await getTokenDecimal(token)
-            cache.set(token, res.decimal)
+            cache.set(token, { decimal: res.decimal, symbol: res.symbol })
             decimal = res.decimal
-            return decimal
+            return {decimal: decimal, symbol: res.symbol}
         }
     }
 
-    const makeDatas = async function (array, decimals) {
+    const makeDatas = async function (array) {
         let datas = [];
         for (let i = 0; i < array.length; i++) {
             if (array[i].op.type === "Swap") {
                 let buyToken = array[i].op.orders[0].tokenBuy.toString();
                 let sellToken = array[i].op.orders[0].tokenSell.toString();
                 let feeToken = array[i].op.feeToken;
+                let feeTokenInfo = await getInfo(feeToken);
+                let sellTokenInfo = await getInfo(sellToken);
+                let buyTokenInfo = await getInfo(buyToken);
                 datas.push({
                     txDate: array[i].createdAt.toString(),
                     txHash: array[i].txHash.toString(),
@@ -230,13 +236,16 @@ const Results = ({ }) => {
                     type: array[i].op.type.toString(),
                     buyToken: buyToken,
                     buyAmount: array[i].op.orders[0].amount.toString(),
-                    buyTokenDecimals: await getDecimal(buyToken, decimals),
+                    buyTokenDecimals: buyTokenInfo.decimal,
+                    buyTokenSymbol: buyTokenInfo.symbol,
                     sellToken: array[i].op.orders[0].tokenSell.toString(),
                     sellAmount: array[i].op.orders[1].amount.toString(),
-                    sellTokenDecimals: await getDecimal(sellToken, decimals),
+                    sellTokenDecimals: sellTokenInfo.decimal,
+                    sellTokenSymbol: sellTokenInfo.symbol,
                     feeToken: array[i].op.feeToken,
                     feeAmount: array[i].op.fee,
-                    feeTokenDecimals: await getDecimal(feeToken, decimals)
+                    feeTokenDecimals: feeTokenInfo.decimal,
+                    feeTokenSymbol: feeTokenInfo.symbol
                 })
             }
         }
