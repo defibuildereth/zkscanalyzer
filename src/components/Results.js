@@ -22,18 +22,18 @@ const Results = ({ }) => {
         setTotalVol(0)
         let balances = await searchAddress(address)
         let decimals = await getDecimals(balances)
-        console.log(decimals)
+        // console.log(decimals)
         let allInfo = parsePrices(balances, decimals)
         getEthPrice(allInfo)
         let allTransactions = await getTransactions(address, 'latest', 0, 0)
-        console.log(balances, allTransactions)
+        console.log(allTransactions)
         const data = await makeDatas(allTransactions, decimals);
         setDatas(data);
-        console.log(data)
+        // console.log(data)
         let uniques = getTotalVol(allTransactions)
         // console.log(uniques)
         let totalVol = await parseUniques(uniques)
-        console.log('totalVol: ', totalVol)
+        // console.log('totalVol: ', totalVol)
     }, [address])
 
     async function searchAddress(address) {
@@ -215,39 +215,69 @@ const Results = ({ }) => {
             let res = await getTokenDecimal(token)
             cache.set(token, { decimal: res.decimal, symbol: res.symbol })
             decimal = res.decimal
-            return {decimal: decimal, symbol: res.symbol}
+            return { decimal: decimal, symbol: res.symbol }
         }
     }
 
     const makeDatas = async function (array) {
+        // console.log(array)
         let datas = [];
         for (let i = 0; i < array.length; i++) {
             if (array[i].op.type === "Swap") {
-                let buyToken = array[i].op.orders[0].tokenBuy.toString();
-                let sellToken = array[i].op.orders[0].tokenSell.toString();
-                let feeToken = array[i].op.feeToken;
-                let feeTokenInfo = await getInfo(feeToken);
-                let sellTokenInfo = await getInfo(sellToken);
-                let buyTokenInfo = await getInfo(buyToken);
-                datas.push({
-                    txDate: array[i].createdAt.toString(),
-                    txHash: array[i].txHash.toString(),
-                    nonce: array[i].op.nonce.toString(),
-                    type: array[i].op.type.toString(),
-                    buyToken: buyToken,
-                    buyAmount: array[i].op.orders[1].amount.toString() * 10 ** - buyTokenInfo.decimal,
-                    buyTokenDecimals: buyTokenInfo.decimal,
-                    buyTokenSymbol: buyTokenInfo.symbol,
-                    sellToken: sellToken,
-                    sellAmount: array[i].op.orders[0].amount.toString()  * 10 ** - sellTokenInfo.decimal,
-                    sellTokenDecimals: sellTokenInfo.decimal,
-                    sellTokenSymbol: sellTokenInfo.symbol,
-                    feeToken: array[i].op.feeToken,
-                    feeAmount: array[i].op.fee * 10 ** - feeTokenInfo.decimal,
-                    feeTokenDecimals: feeTokenInfo.decimal,
-                    feeTokenSymbol: feeTokenInfo.symbol
-                })
-            }
+                if (array[i].op.submitterAddress.toLowerCase() === address.toLowerCase()) {
+                    // these are transactions where we are MM (not currently right)
+                    let buyToken = array[i].op.orders[1].tokenBuy.toString();
+                    let sellToken = array[i].op.orders[1].tokenSell.toString();
+                    let feeToken = array[i].op.feeToken;
+                    let feeTokenInfo = await getInfo(feeToken);
+                    let sellTokenInfo = await getInfo(sellToken);
+                    let buyTokenInfo = await getInfo(buyToken);
+                    datas.push({
+                        txDate: array[i].createdAt.toString(),
+                        txHash: array[i].txHash.toString(),
+                        nonce: array[i].op.nonce.toString(),
+                        type: array[i].op.type.toString(),
+                        buyToken: buyToken,
+                        buyAmount: array[i].op.orders[0].amount.toString() * 10 ** - buyTokenInfo.decimal,
+                        buyTokenDecimals: buyTokenInfo.decimal,
+                        buyTokenSymbol: buyTokenInfo.symbol,
+                        sellToken: sellToken,
+                        sellAmount: array[i].op.orders[1].amount.toString() * 10 ** - sellTokenInfo.decimal,
+                        sellTokenDecimals: sellTokenInfo.decimal,
+                        sellTokenSymbol: sellTokenInfo.symbol,
+                        feeToken: array[i].op.feeToken,
+                        feeAmount: array[i].op.fee * 10 ** - feeTokenInfo.decimal,
+                        feeTokenDecimals: feeTokenInfo.decimal,
+                        feeTokenSymbol: feeTokenInfo.symbol
+                    })
+                } else {
+                    // these are transactions where we are not (currently treated right)
+                    let buyToken = array[i].op.orders[0].tokenBuy.toString();
+                    let sellToken = array[i].op.orders[0].tokenSell.toString();
+                    let feeToken = array[i].op.feeToken;
+                    let feeTokenInfo = await getInfo(feeToken);
+                    let sellTokenInfo = await getInfo(sellToken);
+                    let buyTokenInfo = await getInfo(buyToken);
+                    datas.push({
+                        txDate: array[i].createdAt.toString(),
+                        txHash: array[i].txHash.toString(),
+                        nonce: array[i].op.nonce.toString(),
+                        type: array[i].op.type.toString(),
+                        buyToken: buyToken,
+                        buyAmount: array[i].op.orders[1].amount.toString() * 10 ** - buyTokenInfo.decimal,
+                        buyTokenDecimals: buyTokenInfo.decimal,
+                        buyTokenSymbol: buyTokenInfo.symbol,
+                        sellToken: sellToken,
+                        sellAmount: array[i].op.orders[0].amount.toString() * 10 ** - sellTokenInfo.decimal,
+                        sellTokenDecimals: sellTokenInfo.decimal,
+                        sellTokenSymbol: sellTokenInfo.symbol,
+                        feeToken: array[i].op.feeToken,
+                        feeAmount: array[i].op.fee * 10 ** - feeTokenInfo.decimal,
+                        feeTokenDecimals: feeTokenInfo.decimal,
+                        feeTokenSymbol: feeTokenInfo.symbol
+                    })
+                }
+            } 
         }
         return datas
     }
